@@ -1,0 +1,38 @@
+1. UF7_калькулятор_ЭЦН _1354_с_СУ
+	Макросы в самом документе забирают много новых параметров с листов, особенно на листах:
+		ЭЦН
+		Расчет скважины
+	На лите PVT ошибки в свойствах, не знаю как исправить
+2. в xlame UniflocVBA_7
+	Полностью модуль Emulsion для хранения данных по эмульсиям, интерполяции, итоговой функции 
+		зависимости вязкости эмульсии от обводненности и температуры
+	Также полностью CEmulsion для передачи параметра расчета с эмульсией/без при расчетах 
+		на каждой стадии - участке скважины
+	Значительные изменения также: В классе CWell две общие функции Calc_Plin_Pwf_atma и Calc_Pwf_Plin_atma, в них
+		появляется дополнительный параметр Optional with_Emulsion As Boolean = False
+		и дальше передается в расчетные функции либо через класс CEmulsion, либо явно через
+		переменную типа Boolean. Еще тут кроме LiquidHoldup сохраняются данные по p_MuMix_cP 
+	!!!Основное: В классе Calc_PVT добавляются переменные Optional isEmulsion As Boolean = False, 
+		Optional p_cor_Emulsion As Double = 0. Если True то вязкость смеси p_MuMix_cP 
+		берется по лабораторным данным. Таким образом для расчета я передавал сюда 
+		переменные boolean, чтобы запустить учет эмульсии - т.е сводится к настройке
+		Calc_PVT для разных частей расчета всегда 	
+ 	ESP.calc_ESPsys полностью, т.к. изменял мощности, чтоб считалась только активная.
+		При этом объявил новую переменную efficency_ESP_total_d для расчета КПД всего УЭЦН
+	ESPpump.Calc_ESP и ESP_dPIntegration добавлял постоянно переменные
+	В ESP_dPIntegration основное
+		Call .Calc_PVT(Pst_atma + dPav, Tst_C + dTav, with_Emulsion, cor_Emulsion)
+		+ еще коэффициенты деградации под давлению и подаче тут
+		!!! Dim EffESP_d As Double      ' КПД ЭЦН - а не всего насоса УЭЦН
+	В p_PTbuf = p_Pipe_WHeadHsp_Tubing.Calc_dPipe и далее, когда доходит 
+		до Function CalcGrad опять же Call .Calc_PVT(P_atma, t_c, .isEmulsion, .cor_Emulsion)
+		и сделано только для БеггсБрила
+		 ' вязкость .MuLiq_rc_cP была заменена на вязкость эмульсии
+          	If .isEmulsion Then
+                	dp_dl_arr = unf_BegsBrillGradient(d_m, theta_deg, rough_m, .Qliq_rc_m3day, .Qgas_rc_m3day, .MuMix_cP, .Mug_cP, .sigma_liq_Nm, _
+                                .rho_liq_kgm3, .rho_gas_kgm3, 0, 1, betta_grav, betta_fric)
+          	Else
+               		dp_dl_arr = unf_BegsBrillGradient(d_m, theta_deg, rough_m, .Qliq_rc_m3day, .Qgas_rc_m3day, .MuLiq_rc_cP, .Mug_cP, .sigma_liq_Nm, _
+                                .rho_liq_kgm3, .rho_gas_kgm3, 0, 1, betta_grav, betta_fric)
+          	End If
+	Расчет штуцера в Choke_liquid_rate и тут аналогично заменено Call Fluid.Calc_PVT(p_u, t_u, Fluid.isEmulsion, Fluid.cor_Emulsion) 
