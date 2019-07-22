@@ -9,7 +9,8 @@ Listings generator
 
 Read automitically saved VBA code file and prepares code listings for manual
 """
-
+# TODO где " имя параметра" используется для "имя параметра2" возникает неправильное определение нескольких строк
+# TODO перевод в нижний регистр позволяет все прочитать без ошибок, но если заккомитить .lower() можно будет переименовать переменные
 import re
 import glob
 import os
@@ -23,9 +24,12 @@ file_name = ["u7_Excel_functions.txt",
 
 path_vba_txt = 'modules_txt/'
 path_listings_out = 'description_generated/'
+start_string_for_module = "Option Explicit \n Sub Set_Descriptions() \n On Error Resume Next \n"
+end_string_for_module = "End Sub"
 
 file_name_for_report_str = "report"
 file_name_for_all_stuff = "all_stuff"
+file_name_for_description_module = "u7_descriptions"
 
 """
 string for specific VBA format of description
@@ -49,6 +53,23 @@ class VBA_Func_Header:
         self.str_desc = ''
         self.num_line = 0
         self.lines = []
+
+    def edit_string(self, string):
+        """
+        Editing of original state of string, deleting of some not needed symbols
+
+        :param string: original string
+        :return: edited string with clear syntax
+        """
+        string = string.replace("\"","")
+        string = string.replace("\n", " ")
+        string = string.replace(" _", " ")
+        string = string.replace("     ", " ")
+        string = string.replace("   ", " ")
+        string = string.replace("  ", " ")
+        string = string.replace("  ", " ")
+        string = string.replace("  ", " ")
+        return string
 
     def save_lines_to_file(self, path):
         """
@@ -87,7 +108,7 @@ class VBA_Func_Header:
                 string_contain_function = True
             if not string_contain_function:
                 current_addition = result_lines[string_number]
-                current_addition = current_addition.replace("\n", "")
+                current_addition = self.edit_string(current_addition)
 
                 description_string_lines += current_addition
 
@@ -220,9 +241,8 @@ class VBA_Func_Header:
                         """
                         in this place parametr are found and description will be search in next lines before new parametr
                         """
-                        current_addition = "    \"" + lower_current_string
-                        current_addition = current_addition.replace(" _", "")
-                        current_addition = current_addition.replace("\n", "")
+                        current_addition = "    \"" + self.edit_string(lower_current_string)
+
                         if current_string_number != last_number:
                             current_string_number_plus = current_string_number + 1
                             current_string_plus = result_lines[current_string_number_plus]
@@ -236,7 +256,7 @@ class VBA_Func_Header:
                             current_string_plus_lower = current_string_plus.lower()
                             string_not_contain_new_parametr = True
                             is_not_empty_string = True
-                            is_not_included_result = True # TODO check, can result be used in description?
+                            is_not_included_result = True  # TODO check, can result be used in description?
                             """
                             searching additional lines
                             """
@@ -268,12 +288,7 @@ class VBA_Func_Header:
                                 if current_string_plus_lower.find("езультат") != -1:
                                     is_not_included_result = False
                                 if string_not_contain_new_parametr and is_not_empty_string and is_not_included_result:
-                                    current_string_plus_lower = current_string_plus_lower.replace("\n"," ")
-                                    current_string_plus_lower = current_string_plus_lower.replace(" _", " ")
-                                    current_string_plus_lower = current_string_plus_lower.replace("    ", " ")
-                                    current_string_plus_lower = current_string_plus_lower.replace("   ", " ")
-                                    current_string_plus_lower = current_string_plus_lower.replace("  ", " ")
-                                    current_string_plus_lower = current_string_plus_lower.replace("  ", " ")
+                                    current_string_plus_lower = self.edit_string(current_string_plus_lower)
                                     current_addition += current_string_plus_lower
                                 current_string_number_plus += 1
 
@@ -411,6 +426,7 @@ f3_report = open(fname_report, "w", encoding='UTF-8')
 f3_report.writelines([""])
 f3_report.close()
 
+
 """
 description generation start
 extract function with description markers
@@ -418,3 +434,20 @@ and edited it by format
 """
 for code_file in file_name:
     process_code_file(path_vba_txt + code_file)
+
+"""
+create file .txt for generated description module and fill it
+"""
+f3_module_txt = path_listings_out + '/' + file_name_for_description_module + ".txt"
+f3_module_txt = open(f3_module_txt, "w", encoding='UTF-8')
+f3_module_txt.writelines([""])
+
+f2 = open(fname2, "r", encoding='UTF-8')
+generated_lines = f2.read()
+f3_module_txt.writelines([start_string_for_module])
+f3_module_txt.writelines(generated_lines)
+f3_module_txt.writelines([end_string_for_module])
+
+f3_module_txt.close()
+f2.close()
+print("description module generated in " + f3_module_txt.name)
