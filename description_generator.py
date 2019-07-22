@@ -32,15 +32,12 @@ string for specific VBA format of description
 """
 start_string = "    Application.MacroOptions _\n"
 almost_end_string = ", _\n"
-connect_to_next_string = " & _\n"
 macro_string = "        Macro:="
 description_string = "      Description:="
 category_string = "     Category:=\"u7\", _\n"
-argument_descriptions_string ="     ArgumentDescriptions:=Array("
+argument_descriptions_string = "     ArgumentDescriptions:=Array("
 connect_to_next_string_in_array = ", _\n"
 
-flag = "flag"
-flag2 = "flag2"
 
 class VBA_Func_Header:
     """
@@ -71,12 +68,12 @@ class VBA_Func_Header:
         """
         addition of start string - 1 line
         """
-        result_lines.insert(0,start_string)
+        result_lines.insert(0, start_string)
 
         """
         addition of 2th string - 2 line - with function name
         """
-        result_lines.insert(1, macro_string + "\""  + self.func_name + "\"" + almost_end_string)
+        result_lines.insert(1, macro_string + "\"" + self.func_name + "\"" + connect_to_next_string_in_array)
 
         """
         preparing and editing of short function description above declaration of function
@@ -85,22 +82,17 @@ class VBA_Func_Header:
         string_number = 2
         description_string_lines = description_string + "\""
         while string_contain_function == False:
-            math_object = re.search(r'Function',result_lines[string_number])
+            math_object = re.search(r'Function', result_lines[string_number])
             if math_object != None:
                 string_contain_function = True
             if not string_contain_function:
                 current_addition = result_lines[string_number]
-                #current_addition += current_addition
-                #current_addition = current_addition.replace("\n", "\"" + connect_to_next_string)
                 current_addition = current_addition.replace("\n", "")
 
                 description_string_lines += current_addition
 
                 string_number += 1
             else:
-                #last_addition_with_end = current_addition
-                #last_addition_with_end = last_addition_with_end.replace(connect_to_next_string, almost_end_string)
-                #description_string_lines = description_string_lines.replace(current_addition,last_addition_with_end)
                 description_string_lines += "\"" + connect_to_next_string_in_array
 
         """
@@ -244,7 +236,7 @@ class VBA_Func_Header:
                             current_string_plus_lower = current_string_plus.lower()
                             string_not_contain_new_parametr = True
                             is_not_empty_string = True
-                            is_not_included_result = True #TODO check, can result be used in description?
+                            is_not_included_result = True # TODO check, can result be used in description?
                             """
                             searching additional lines
                             """
@@ -282,7 +274,6 @@ class VBA_Func_Header:
                                     current_string_plus_lower = current_string_plus_lower.replace("   ", " ")
                                     current_string_plus_lower = current_string_plus_lower.replace("  ", " ")
                                     current_string_plus_lower = current_string_plus_lower.replace("  ", " ")
-                                    #current_addition += connect_to_next_string + "          \""+ current_string_plus_lower +"\""
                                     current_addition += current_string_plus_lower
                                 current_string_number_plus += 1
 
@@ -322,13 +313,12 @@ class VBA_Func_Header:
         """
         deleting of last lines
         """
-        for i in range(5,last_number+2):
+        for i in range(5, last_number + 2):
             result_lines.pop(5)
 
         """
         deleting last symbols, that are not needed 
         """
-        double_end = ("\"" + connect_to_next_string_in_array)*2
         k = 0
         for i in result_lines:
 
