@@ -1,4 +1,4 @@
-Option Explicit 
+﻿ Option Explicit 
  Sub Set_Descriptions() 
  On Error Resume Next 
     Application.MacroOptions _
