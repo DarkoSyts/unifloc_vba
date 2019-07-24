@@ -69,7 +69,16 @@ class VBA_Func_Header:
         string = string.replace("  ", " ")
         string = string.replace("  ", " ")
         string = string.replace("  ", " ")
+        string = string.replace("https://", "www.")
+        string = string.replace("http://", "www.")
         return string
+
+    def replace_long_edited_string(self, string):
+        if len(string) > 182:
+            string = string[:182]
+            string += "..см.мануал"
+        return string
+
 
     def save_lines_to_file(self, path):
         """
@@ -291,7 +300,7 @@ class VBA_Func_Header:
                                     current_string_plus_lower = self.edit_string(current_string_plus_lower)
                                     current_addition += current_string_plus_lower
                                 current_string_number_plus += 1
-
+                        current_addition = self.replace_long_edited_string(current_addition)
                         current_addition += "\""
                         current_addition += connect_to_next_string_in_array
                         argument_descriptions_string_with_stuff += current_addition
