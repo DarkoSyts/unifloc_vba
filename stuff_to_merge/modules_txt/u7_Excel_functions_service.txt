@@ -1,0 +1,511 @@
+'=======================================================================================
+'Unifloc 7.6  Vulpes zerda                                           khabibullin.ra@gubkin.ru
+'Petroleum engineering calculations modules (macroses)
+'2000 - 2019
+'
+'=======================================================================================
+' вспомогательные функции для проведения расчетов из интерфейса Excel
+Option Explicit
+Public Function UFversion() As String
+    UFversion = "Unifloc 7.6  Vulpes zerda"
+End Function
+Public Function PVT_Encode_string( _
+                    Optional ByVal gamma_gas As Double = const_gamma_gas_default, _
+                    Optional ByVal gamma_oil As Double = const_gamma_oil_default, _
+                    Optional ByVal gamma_wat As Double = const_gamma_wat_default, _
+                    Optional ByVal rsb_m3m3 = const_Rsb_default, _
+                    Optional ByVal Rp_m3m3 = -1, _
+                    Optional ByVal Pb_atma = -1, _
+                    Optional ByVal Tres_C = const_Tres_default, _
+                    Optional ByVal Bob_m3m3 = -1, _
+                    Optional ByVal Muob_cP = -1, _
+                    Optional ByVal PVTcorr = StandingBased, _
+                    Optional ByVal Ksep_fr = 0, _
+                    Optional ByVal PKsep_atma = -1, _
+                    Optional ByVal TKsep_C = -1 _
+                    )
+' функция кодирования значений PVT в строку, которую можно потом использовать
+    Dim str As String
+    Dim frmt As String
+    Dim frmt_int As String
+    frmt = "#0.##0"
+    frmt_int = "0"
+    str = ""
+    str = str & "gamma_gas:" & Format(gamma_gas, frmt) & ";"
+    str = str & "gamma_oil:" & Format(gamma_oil, frmt) & ";"
+    str = str & "gamma_wat:" & Format(gamma_wat, frmt) & ";"
+    str = str & "rsb_m3m3:" & Format(rsb_m3m3, frmt) & ";"
+    str = str & "Rp_m3m3:" & Format(Rp_m3m3, frmt) & ";"
+    str = str & "Pb_atma:" & Format(Pb_atma, frmt) & ";"
+    str = str & "Tres_C:" & Format(Tres_C, frmt) & ";"
+    str = str & "Bob_m3m3:" & Format(Bob_m3m3, frmt) & ";"
+    str = str & "Muob_cP:" & Format(Muob_cP, frmt) & ";"
+    str = str & "PVTcorr:" & Format(PVTcorr, frmt_int) & ";"
+    str = str & "Ksep_fr:" & Format(Ksep_fr, frmt) & ";"
+    str = str & "PKsep_atma:" & Format(PKsep_atma, frmt) & ";"
+    str = str & "TKsep_C:" & Format(TKsep_C, frmt) & ";"
+    PVT_Encode_string = str
+    
+End Function
+Public Function PVT_Decode_string(PVTStr As String, Optional ByVal getStr As Boolean = False)
+' функция расшифровки значений PVT свойств
+    Dim a
+    Dim s As String
+    Dim i As Integer
+    Dim b
+    Dim P_atma As Double
+    Dim t_c, gamma_gas As Double, gamma_oil As Double, _
+               gamma_wat As Double, rsb_m3m3 As Double, Rp_m3m3 As Double, _
+              Pb_atma As Double, Tres_C As Double, Bob_m3m3 As Double, Muob_cP As Double _
+              , PVTcorr, Ksep_fr As Double, PKsep_atma As Double, TKsep_C As Double
+On Error GoTo er1:
+' ловим все ошибки, все должно пройти идеально при дешифровке
+'
+    
+    s = PVTStr '.Cells(1, 1).Value2
+    
+    a = Split(s, ";")
+    i = 0
+    b = Split(a(i), ":"): i = i + 1
+    If b(0) = "gamma_gas" And b(1) <> "" Then
+        gamma_gas = Cdbl_(b(1))
+    End If
+    b = Split(a(i), ":")
+    i = i + 1
+        
+    If b(0) = "gamma_oil" And b(1) <> "" Then gamma_oil = Cdbl_(b(1))
+    b = Split(a(i), ":"): i = i + 1
+    If b(0) = "gamma_wat" And b(1) <> "" Then gamma_wat = Cdbl_(b(1))
+    b = Split(a(i), ":"): i = i + 1
+    If b(0) = "rsb_m3m3" And b(1) <> "" Then rsb_m3m3 = Cdbl_(b(1))
+    b = Split(a(i), ":"): i = i + 1
+    If b(0) = "Rp_m3m3" And b(1) <> "" Then Rp_m3m3 = Cdbl_(b(1))
+    b = Split(a(i), ":"): i = i + 1
+    If b(0) = "Pb_atma" And b(1) <> "" Then
+        Pb_atma = Cdbl_(b(1))
+    ElseIf b(1) = "" Then
+        ' калибровочный параметр проверяем специально и не даем сохраниться значению по умолчанию
+        ' если он неправильно указан (дублируется инициализацией в конструкторе, но все же)
+        Pb_atma = -1
+    End If
+    b = Split(a(i), ":"): i = i + 1
+    If b(0) = "Tres_C" And b(1) <> "" Then Tres_C = Cdbl_(b(1))
+    b = Split(a(i), ":"): i = i + 1
+    If b(0) = "Bob_m3m3" And b(1) <> "" Then
+        ' калибровочный параметр проверяем специально и не даем сохраниться значению по умолчанию
+        ' если он неправильно указан (дублируется инициализацией в конструкторе, но все же)
+        Bob_m3m3 = Cdbl_(b(1))
+    ElseIf b(1) = "" Then
+        Bob_m3m3 = -1
+    End If
+    b = Split(a(i), ":"): i = i + 1
+    If b(0) = "Muob_cP" And b(1) <> "" Then
+        ' калибровочный параметр проверяем специально и не даем сохраниться значению по умолчанию
+        ' если он неправильно указан (дублируется инициализацией в конструкторе, но все же)
+        Muob_cP = Cdbl_(b(1))
+    ElseIf b(1) = "" Then
+        Muob_cP = -1
+    End If
+    b = Split(a(i), ":"): i = i + 1
+    If b(0) = "PVTcorr" And b(1) <> "" Then PVTcorr = Cdbl_(b(1))
+    b = Split(a(i), ":"): i = i + 1
+    If b(0) = "Ksep_fr" And b(1) <> "" Then Ksep_fr = Cdbl_(b(1))
+    b = Split(a(i), ":"): i = i + 1
+    If b(0) = "PKsep_atma" And b(1) <> "" Then PKsep_atma = Cdbl_(b(1))
+    b = Split(a(i), ":"): i = i + 1
+    If b(0) = "TKsep_C" And b(1) <> "" Then TKsep_C = Cdbl_(b(1))
+    
+    Dim PVT As New CPVT
+    PVT.Init gamma_gas, gamma_oil, gamma_wat, rsb_m3m3, Pb_atma, Bob_m3m3, PVTcorr, Tres_C, Rp_m3m3, Muob_cP
+    If Ksep_fr > 0 And Ksep_fr <= 1 And PKsep_atma > 0 And TKsep_C > 0 Then
+        Call PVT.ModAfterSeparation(PKsep_atma, TKsep_C, Ksep_fr, GasGoesIntoSolution)
+    End If
+    If getStr Then
+        PVT_Decode_string = PVT_Encode_string(gamma_gas, gamma_oil, _
+               gamma_wat, rsb_m3m3, Rp_m3m3, _
+              Pb_atma, Tres_C, Bob_m3m3, Muob_cP, PVTcorr, Ksep_fr, PKsep_atma, _
+              TKsep_C)
+    Else
+        Set PVT_Decode_string = PVT
+    End If
+    Exit Function
+er1:
+    addLogMsg_debug "PVT_Decode_string. error reading PVT str:", PVTStr
+    Err.Raise vbObjectError + 1, , "PVT_Decode_string. error reading PVT str"
+    
+End Function
+Public Function Well_Encode_string( _
+                    Optional ByVal Hperf_m As Double = 2000, _
+                    Optional ByVal Hpump_m As Double = 1800, _
+                    Optional ByVal Udl_m As Double = 0, _
+                    Optional ByVal dCas_mm As Double = 150, _
+                    Optional ByVal dTub_mm As Double = 72, _
+                    Optional ByVal dchoke_mm As Double = 15, _
+                    Optional ByVal roughness_m As Double = 0.0001, _
+                    Optional ByVal Tbh_C As Double = 85, _
+                    Optional ByVal Twh_C As Double = 25)
+' функция кодирования значений PVT в строку, которую можно потом использовать
+    Dim str As String
+    Dim frmt As String
+    Dim frmt_int As String
+    frmt = "#0.####0"
+    frmt_int = "0"
+    str = ""
+    str = str & "Hperf_m:" & Format(Hperf_m, frmt) & ";"
+    str = str & "Hpump_m:" & Format(Hpump_m, frmt) & ";"
+    str = str & "Udl_m:" & Format(Udl_m, frmt) & ";"
+    str = str & "dCas_mm:" & Format(dCas_mm, frmt) & ";"
+    str = str & "dTub_mm:" & Format(dTub_mm, frmt) & ";"
+    str = str & "dchoke_mm:" & Format(dchoke_mm, frmt) & ";"
+    str = str & "roughness_m:" & Format(roughness_m, frmt) & ";"
+    str = str & "Tbh_C:" & Format(Tbh_C, frmt) & ";"
+    str = str & "Twh_C:" & Format(Twh_C, frmt) & ";"
+    Well_Encode_string = str
+    
+End Function
+Public Function Well_Decode_string(wellStr As String, Optional ByVal getStr As Boolean = False)
+' функция расшифровки значений PVT свойств
+    Dim a
+    Dim s As String
+    Dim i As Integer
+    Dim b
+    Dim P_atma As Double
+    Dim Hperf_m As Double
+    Dim Hpump_m As Double
+    Dim Udl_m As Double
+    Dim dCas_mm As Double
+    Dim dTub_mm As Double
+    Dim dchoke_mm As Double
+    Dim roughness_m As Double
+    Dim Tbh_C As Double
+    Dim Twh_C As Double
+    Dim well As CWell
+On Error GoTo er1:
+' ловим все ошибки, все должно пройти идеально при дешифровке
+'
+    
+    s = wellStr '.Cells(1, 1).Value2
+    
+    a = Split(s, ";")
+    i = 0
+    b = Split(a(i), ":"): i = i + 1
+    If b(0) = "Hperf_m" And b(1) <> "" Then Hperf_m = Cdbl_(b(1))
+    b = Split(a(i), ":"):    i = i + 1
+    If b(0) = "Hpump_m" And b(1) <> "" Then Hpump_m = Cdbl_(b(1))
+    b = Split(a(i), ":"): i = i + 1
+    If b(0) = "Udl_m" And b(1) <> "" Then Udl_m = Cdbl_(b(1))
+    b = Split(a(i), ":"): i = i + 1
+    If b(0) = "dCas_mm" And b(1) <> "" Then dCas_mm = Cdbl_(b(1))
+    b = Split(a(i), ":"): i = i + 1
+    If b(0) = "dTub_mm" And b(1) <> "" Then dTub_mm = Cdbl_(b(1))
+    b = Split(a(i), ":"): i = i + 1
+    If b(0) = "dchoke_mm" And b(1) <> "" Then dchoke_mm = Cdbl_(b(1))
+    b = Split(a(i), ":"): i = i + 1
+    If b(0) = "roughness_m" And b(1) <> "" Then roughness_m = Cdbl_(b(1))
+    b = Split(a(i), ":"): i = i + 1
+    If b(0) = "Tbh_C" And b(1) <> "" Then Tbh_C = Cdbl_(b(1))
+    b = Split(a(i), ":"): i = i + 1
+    If b(0) = "Twh_C" And b(1) <> "" Then Twh_C = Cdbl_(b(1))
+    
+    If getStr Then
+         Well_Decode_string = Well_Encode_string(Hperf_m, Hpump_m, Udl_m, _
+                                                    dCas_mm, dTub_mm, dchoke_mm, roughness_m, _
+                                                    Tbh_C, Twh_C)
+    Else
+        ' if ready to init well then do it
+        Set well = New CWell
+        well.InitWell Hperf_m, Hpump_m, Udl_m, dCas_mm, dTub_mm, Tbh_C, Twh_C
+        ' initwell with use linear temp distribution mode by default
+        ' so no  need to adjust temperature here anymore
+        well.SetChoke dchoke_mm, dTub_mm
+        Set Well_Decode_string = well
+    End If
+    Exit Function
+er1:
+    addLogMsg_debug "Well_Decode_string. error reading well str:", wellStr
+    Err.Raise vbObjectError + 1, , "well_Decode_string. error reading well str"
+    
+End Function
+Public Function ESP_Encode_string( _
+                    Optional ByVal ESP_ID As Double = 1005, _
+                    Optional ByVal HeadNom_m As Double = 2000, _
+                    Optional ByVal ESPfreq_Hz As Double = 50, _
+                    Optional ByVal ESP_U_V As Double = 1000, _
+                    Optional ByVal MotorPowerNom_kW As Double = 30, _
+                    Optional ByVal Tint_C As Double = 85, _
+                    Optional ByVal Tdis_C As Double = 25, _
+                    Optional ByVal KsepGS_fr As Double = 0)
+' функция кодирования значений PVT в строку, которую можно потом использовать
+    Dim str As String
+    Dim frmt As String
+    Dim frmt_int As String
+    frmt = "#0.####0"
+    frmt_int = "0"
+    str = ""
+    str = str & "ESP_ID:" & Format(ESP_ID, frmt) & ";"
+    str = str & "HeadNom_m:" & Format(HeadNom_m, frmt) & ";"
+    str = str & "ESPfreq_Hz:" & Format(ESPfreq_Hz, frmt) & ";"
+    str = str & "ESP_U_V:" & Format(ESP_U_V, frmt) & ";"
+    str = str & "MotorPowerNom_kW:" & Format(MotorPowerNom_kW, frmt) & ";"
+    str = str & "Tint_C:" & Format(Tint_C, frmt) & ";"
+    str = str & "Tdis_C:" & Format(Tdis_C, frmt) & ";"
+    str = str & "KsepGS_fr:" & Format(KsepGS_fr, frmt) & ";"
+    ESP_Encode_string = str
+    
+End Function
+Public Function ESP_Decode_string(ESPStr As String, Optional ByVal getStr As Boolean = False)
+' функция расшифровки значений PVT свойств
+    Dim a
+    Dim s As String
+    Dim i As Integer
+    Dim b
+    Dim P_atma As Double
+    Dim ESP_ID As Double
+    Dim HeadNom_m As Double
+    Dim ESPfreq_Hz As Double
+    Dim ESP_U_V As Double
+    Dim MotorPowerNom_kW As Double
+    Dim Tint_C As Double
+    Dim Tdis_C As Double
+    Dim KsepGS_fr As Double
+    Dim ESPsys As CESPsystemSimple
+    Dim pmp As CESPpump
+On Error GoTo er1:
+' ловим все ошибки, все должно пройти идеально при дешифровке
+'
+    
+    s = ESPStr '.Cells(1, 1).Value2
+On Error GoTo er2:
+    a = Split(s, ";")
+    i = 0
+    b = Split(a(i), ":"): i = i + 1
+    If b(0) = "ESP_ID" And b(1) <> "" Then ESP_ID = Cdbl_(b(1))
+    b = Split(a(i), ":"):    i = i + 1
+    If b(0) = "HeadNom_m" And b(1) <> "" Then HeadNom_m = Cdbl_(b(1))
+    b = Split(a(i), ":"): i = i + 1
+    If b(0) = "ESPfreq_Hz" And b(1) <> "" Then ESPfreq_Hz = Cdbl_(b(1))
+    b = Split(a(i), ":"): i = i + 1
+    If b(0) = "ESP_U_V" And b(1) <> "" Then ESP_U_V = Cdbl_(b(1))
+    b = Split(a(i), ":"): i = i + 1
+    If b(0) = "MotorPowerNom_kW" And b(1) <> "" Then MotorPowerNom_kW = Cdbl_(b(1))
+    b = Split(a(i), ":"): i = i + 1
+    If b(0) = "Tint_C" And b(1) <> "" Then Tint_C = Cdbl_(b(1))
+    b = Split(a(i), ":"): i = i + 1
+    If b(0) = "Tdis_C" And b(1) <> "" Then Tdis_C = Cdbl_(b(1))
+    b = Split(a(i), ":"): i = i + 1
+    If b(0) = "KsepGS_fr" And b(1) <> "" Then KsepGS_fr = Cdbl_(b(1))
+    
+    On Error GoTo er1:
+    If getStr Then
+         ESP_Decode_string = ESP_Encode_string(ESP_ID, HeadNom_m, ESPfreq_Hz, _
+                                                    ESP_U_V, MotorPowerNom_kW, Tint_C, Tdis_C)
+    Else
+        If ESP_ID > 0 Then
+            If checkID_ESP(ESP_ID) Then
+                Set pmp = getESP(ESP_ID)
+                pmp.StageNum = pmp.Calc_ESP_NumStages(pmp.NominalRate_m3day, HeadNom_m) ' ESP_numStages
+                pmp.freq_Hz = ESPfreq_Hz
+                Set ESPsys = New CESPsystemSimple
+                Set ESPsys.ESPpump = pmp
+                ESPsys.U_V = ESP_U_V
+                ESPsys.Power_nom_W = MotorPowerNom_kW * 1000
+                ESPsys.KSepGasSep_fr = KsepGS_fr
+                ESPsys.Tint_C = Tint_C
+                ESPsys.Tdis_C = Tdis_C
+            End If
+        End If
+        Set ESP_Decode_string = ESPsys
+    End If
+    Exit Function
+er1:
+    On Error Resume Next
+    addLogMsg_debug "ESP_Decode_string. error reading well str:", ESPStr
+    Err.Raise vbObjectError + 1, , "esp_Decode_string. error reading esp str"
+    Exit Function
+er2:
+    On Error Resume Next
+    addLogMsg "ESP_Decode_string: error readin ESP string param" & CStr(i) & ": "
+    Resume Next
+    
+End Function
+Public Function WellGL_Decode_string(WellGLStr As String, Optional ByVal getStr As Boolean = False)
+On Error GoTo er1:
+' ловим все ошибки, все должно пройти идеально при дешифровке
+'
+    Dim Hperf_m As Double
+    Dim s As String
+    Dim a, b
+    Dim i As Integer
+    
+    Dim Htub_m As Double
+    Dim Udl_m As Double
+    Dim dCas_mm As Double
+    Dim dTub_mm As Double
+    Dim dchoke_mm As Double
+    Dim roughness_m As Double
+    Dim Tbh_C As Double
+    Dim Twh_C As Double
+    Dim GLV As Integer
+    
+    
+    s = WellGLStr
+    
+    a = Split(s, ";")
+    i = 0
+    b = Split(a(i), ":"): i = i + 1
+    If b(0) = "Hperf_m" And b(1) <> "" Then Hperf_m = Cdbl_(b(1))
+    b = Split(a(i), ":"): i = i + 1
+    If b(0) = "Htub_m" And b(1) <> "" Then Htub_m = Cdbl_(b(1))
+    b = Split(a(i), ":"): i = i + 1
+    If b(0) = "Udl_m" And b(1) <> "" Then Udl_m = Cdbl_(b(1))
+    b = Split(a(i), ":"): i = i + 1
+    If b(0) = "dCas_mm" And b(1) <> "" Then dCas_mm = Cdbl_(b(1))
+    b = Split(a(i), ":"): i = i + 1
+    If b(0) = "dTub_mm" And b(1) <> "" Then dTub_mm = Cdbl_(b(1))
+    b = Split(a(i), ":"): i = i + 1
+    If b(0) = "dchoke_mm" And b(1) <> "" Then dchoke_mm = Cdbl_(b(1))
+    b = Split(a(i), ":"): i = i + 1
+    If b(0) = "roughness_m" And b(1) <> "" Then roughness_m = Cdbl_(b(1))
+    b = Split(a(i), ":"): i = i + 1
+    If b(0) = "Tbh_C" And b(1) <> "" Then Tbh_C = Cdbl_(b(1))
+    b = Split(a(i), ":"): i = i + 1
+    If b(0) = "Twh_C" And b(1) <> "" Then Twh_C = Cdbl_(b(1))
+    
+    ' net GLV set read start
+    
+    b = Split(a(i), ":"): i = i + 1
+    If b(0) = "GLV" And b(1) <> "" Then GLV = CInt(b(1))
+    
+    Dim H_glv_m() As Double
+    Dim d_glv_mm() As Double
+    Dim p_glv_atma() As Double
+    ReDim H_glv_m(1 To GLV)
+    ReDim d_glv_mm(1 To GLV)
+    ReDim p_glv_atma(1 To GLV)
+    Dim j As Integer
+    For j = 1 To GLV
+        b = Split(a(i), ":"): i = i + 1
+        If b(0) = "H_glv_m" And b(1) <> "" Then H_glv_m(j) = Cdbl_(b(1))
+        b = Split(a(i), ":"): i = i + 1
+        If b(0) = "d_glv_mm" And b(1) <> "" Then d_glv_mm(j) = Cdbl_(b(1))
+        b = Split(a(i), ":"): i = i + 1
+        If b(0) = "p_glv_atma" And b(1) <> "" Then p_glv_atma(j) = Cdbl_(b(1))
+    Next j
+    
+    If getStr Then
+        WellGL_Decode_string = WellGL_Encode_string( _
+                    Hperf_m, _
+                    Htub_m, _
+                    Udl_m, _
+                    dCas_mm, _
+                    dTub_mm, _
+                    dchoke_mm, _
+                    roughness_m, _
+                    Tbh_C, _
+                    Twh_C, _
+                    H_glv_m, _
+                    d_glv_mm, _
+                    p_glv_atma)
+    Else
+        Dim well As CWellGL
+        Set well = NewWellGL()
+        Call well.InitWell(Hperf_m, Htub_m, Udl_m, dCas_mm, dTub_mm, Tbh_C, Twh_C)
+        well.Choke.Dchoke_m = dchoke_mm
+        well.HFlowCorrelation = BeggsBriilCor
+        Set WellGL_Decode_string = well
+    End If
+    Exit Function
+er1:
+    WellGL_Decode_string = "error"
+End Function
+Public Function WellGL_Encode_string( _
+                    Optional ByVal Hperf_m As Double = 2000, _
+                    Optional ByVal Htub_m As Double = 1800, _
+                    Optional ByVal Udl_m As Double = 0, _
+                    Optional ByVal dCas_mm As Double = 150, _
+                    Optional ByVal dTub_mm As Double = 72, _
+                    Optional ByVal dchoke_mm As Double = 15, _
+                    Optional ByVal roughness_m As Double = 0.0001, _
+                    Optional ByVal Tbh_C As Double = 85, _
+                    Optional ByVal Twh_C As Double = 25, _
+                    Optional HmesGLV_m = 0, _
+                    Optional dGLV_mm = 0, _
+                    Optional PsurfGLV_atma = 0)
+' функция кодирования значений PVT в строку, которую можно потом использовать
+    Dim str As String
+    Dim frmt As String
+    Dim frmt_int As String
+    
+    Dim H_glv_m() As Variant
+    Dim d_glv_mm() As Variant
+    Dim p_glv_atma() As Variant
+    
+    frmt = "#0.####0"
+    frmt_int = "0"
+    str = ""
+    str = str & "Hperf_m:" & Format(Hperf_m, frmt) & ";"
+    str = str & "Htub_m:" & Format(Htub_m, frmt) & ";"
+    str = str & "Udl_m:" & Format(Udl_m, frmt) & ";"
+    str = str & "dCas_mm:" & Format(dCas_mm, frmt) & ";"
+    str = str & "dTub_mm:" & Format(dTub_mm, frmt) & ";"
+    str = str & "dchoke_mm:" & Format(dchoke_mm, frmt) & ";"
+    str = str & "roughness_m:" & Format(roughness_m, frmt) & ";"
+    str = str & "Tbh_C:" & Format(Tbh_C, frmt) & ";"
+    str = str & "Twh_C:" & Format(Twh_C, frmt) & ";"
+    
+    H_glv_m = readRange(HmesGLV_m)
+    d_glv_mm = readRange(dGLV_mm)
+    p_glv_atma = readRange(PsurfGLV_atma)
+    
+    Dim i As Integer
+    If (UBound(H_glv_m) = UBound(d_glv_mm)) And (UBound(H_glv_m) = UBound(p_glv_atma)) Then
+        str = str & "GLV:" & FormatInteger(UBound(H_glv_m)) & ";"
+        For i = LBound(H_glv_m) To UBound(H_glv_m)
+            str = str & "H_glv_m:" & FormatFReal(Cdbl_(H_glv_m(i))) & ";"
+            str = str & "d_glv_mm:" & FormatFReal(Cdbl_(d_glv_mm(i))) & ";"
+            str = str & "p_glv_atma:" & FormatFReal(Cdbl_(p_glv_atma(i))) & ";"
+        Next i
+    Else
+        str = str & "GVL:0;error" & ";"
+    End If
+    
+    WellGL_Encode_string = str
+    
+End Function
+Private Function readRange(rr)
+    Dim ar() As Variant
+    Dim arout() As Variant
+        Dim i As Integer
+        Dim j As Integer
+On Error GoTo err1:
+    If (TypeOf rr Is Range) Or IsArray(rr) Then
+        If (TypeOf rr Is Range) Then
+            If rr.Cells.Count = 1 Then
+                ReDim ar(1 To 1, 1 To 1)
+                ar(1, 1) = rr.Value
+            Else
+                ar = rr.Value
+            End If
+            j = 0
+            For i = LBound(ar) To UBound(ar)
+                If Not IsEmpty(ar(i, 1)) Then
+                    j = j + 1
+                    ReDim Preserve arout(1 To j)
+                    arout(j) = ar(i, 1)
+                End If
+            Next i
+        Else
+            ReDim arout(LBound(rr) To UBound(rr))
+            For i = LBound(rr) To UBound(rr)
+                arout(i) = rr(i)
+            Next i
+        End If
+    Else
+        ReDim arout(1 To 1, 1 To 1)
+        arout(1, 1) = rr
+    End If
+    readRange = arout
+    Exit Function
+err1:
+    readRange = "error"
+End Function

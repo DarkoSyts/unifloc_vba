@@ -1,0 +1,3 @@
+Sub Кнопка25_Щелчок()
+[Ql_scm3day_]
+End Sub

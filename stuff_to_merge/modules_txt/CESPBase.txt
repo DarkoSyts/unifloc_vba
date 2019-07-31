@@ -1,0 +1,174 @@
+'=======================================================================================
+'Unifloc 7.6  Vulpes zerda                                           khabibullin.ra@gubkin.ru
+'Petroleum engineering calculations modules (macroses)
+'2000 - 2019
+'
+'=======================================================================================
+'
+' база характеристик погружного оборудовани€ - Ё÷Ќ и пр
+' умеет считывать базу и проводить по ней поиск и анализ
+'
+Option Explicit
+' класс дл€ доступа к базе насосов
+Private ESPload As CESPpump
+Public ESPcollection As New Collection
+Private p_SpreadSheetName_ESP As String
+Private MotorLoad As CESPMotor   ' считыватель дл€ двигателей
+Public MotorCollection As New Collection  ' список всех двигателей в базе
+Private p_SpreadSheetName_Motor As String
+ ' блок оценки качества данных
+ 'Public' LogMsg As New CLogger                ' логгер
+Public Function NumPumps() As Integer
+    NumPumps = ESPcollection.Count
+End Function
+Public Function GetBestPump(Qmix_m3day As Double) As CESPpump
+    Dim ESP As CESPpump
+    Dim maxEff As Double
+    Dim CurEff As Double
+    maxEff = 0
+     
+     For Each ESP In ESPcollection
+         CurEff = ESP.Get_ESP_effeciency_fr(Qmix_m3day)
+         If CurEff > maxEff Then
+            maxEff = CurEff
+            Set GetBestPump = ESP
+         End If
+     Next
+     If maxEff = 0 Then GetBestPump = Nothing
+End Function
+Public Sub ClearDB()
+  Dim i As Long
+  
+  For i = 1 To ESPcollection.Count      ' Remove name from the collection.
+        ESPcollection.Remove 1          ' Since collections are reindexed
+                                        ' automatically, remove the first
+  Next                                  ' member on each iteration.
+  
+  For i = 1 To MotorCollection.Count    ' Remove name from the collection.
+        MotorCollection.Remove 1        ' Since collections are reindexed
+                                        ' automatically, remove the first
+  Next                                  ' member on each iteration.
+End Sub
+Public Sub LoadDB_ESP()
+    Dim i As Long
+    Dim StartCell As Long
+    Dim EndCell As Long
+    Dim currID As Integer, currIDnew As Integer
+    Dim frNom As Double
+    Dim NumPumps As Integer
+    NumPumps = 0
+    Dim rateRange
+    Dim headRange
+    Dim powerRange
+    Dim effRange
+    Dim Item
+    Dim Index
+    Call ClearDB
+    i = 4   ' все начинаетс€ с 4 строки
+    
+    With ThisWorkbook.Worksheets(p_SpreadSheetName_ESP)
+    Do
+        StartCell = i
+        currID = .Cells(i, 2)
+        Do
+            EndCell = i
+            i = i + 1
+            currIDnew = .Cells(i, 2)
+        Loop Until currIDnew <> currID Or currID = 0
+        
+        If EndCell - StartCell > 3 Then
+            rateRange = .Range(.Cells(StartCell, 12), .Cells(EndCell, 12))
+            headRange = .Range(.Cells(StartCell, 13), .Cells(EndCell, 13))
+            powerRange = .Range(.Cells(StartCell, 14), .Cells(EndCell, 14))
+            effRange = .Range(.Cells(StartCell, 15), .Cells(EndCell, 15))
+            frNom = .Cells(StartCell, 10)
+            
+            Set ESPload = New CESPpump
+            Call ESPload.LoadESP_points("test", rateRange, headRange, powerRange, effRange, frNom)
+            ESPload.ID = currID
+            ESPload.StageNum = 1
+            ESPload.freq_Hz = .Cells(StartCell, 10)
+            ESPload.ManufacturerName = .Cells(StartCell, 3)
+            ESPload.PumpName = .Cells(StartCell, 4)
+            ESPload.MaxStagesNumber = .Cells(StartCell, 5)
+            ESPload.NominalRate_m3day = .Cells(StartCell, 6)
+            ESPload.OptimumMinRate_m3day = .Cells(StartCell, 7)
+            ESPload.OptimumMaxRate_m3day = .Cells(StartCell, 8)
+            ESPcollection.Add ESPload, CStr(currID)
+            NumPumps = NumPumps + 1
+        End If
+    Loop Until currID = 0
+    End With
+End Sub
+Private Sub Class_Initialize()
+    p_SpreadSheetName_ESP = "ESPbase"
+    Call LoadDB_ESP
+    p_SpreadSheetName_Motor = "Ѕаза двигателей"
+End Sub
+Public Function GetPump(ByVal ID As Integer) As CESPpump
+    On Error GoTo err1:
+        Set GetPump = ESPcollection.Item(CStr(ID))
+    Exit Function
+err1:
+        addLogMsg "ќшибка при загрузке из базы насоса ID = " & ID & " ."
+        Err.Raise kErrESPbase, , "Ќе удалось найти насос " & ID & " в базе"
+End Function
+Public Sub LoadDB_Motor()
+' метод загрузки базы двигателей
+'Dim i As Long
+'Dim StartCell As Long
+'Dim EndCell As Long
+'Dim currID As Integer, currIDnew As Integer
+'Dim frNom As Double
+'Dim NumPumps As Integer
+'NumPumps = 0
+'Dim Item
+'Dim Index
+'Call ClearDB
+'i = 4   ' все начинаетс€ с 4 строки
+'With Worksheets(p_SpreadSheetName_Motor)
+'Do
+'    StartCell = i
+'    EndCell = i    ' вс€ информаци€ по двигателю хранитс€ в одной строке пока
+'
+'    currID = .Cells(i, 2)
+'
+'    If currID > 0 Then    ' если есть ID в базе считаем, что там есть данные
+'
+'
+'        Set MotorLoad = New CESPMotor
+'        MotorLoad.ID = .Cells(StartCell, 2)
+'        MotorLoad.ManufacturerName = .Cells(StartCell, 3)
+'        MotorLoad.MotorName = .Cells(StartCell, 4)
+'        MotorLoad.Pnom_kW = .Cells(StartCell, 5)
+'        MotorLoad.Unom_lin_V = .Cells(StartCell, 6)
+'        MotorLoad.Inom_lin_A = .Cells(StartCell, 7)
+'        MotorLoad.Effnom_d = .Cells(StartCell, 8)
+'        MotorLoad.CosPhinom_d = .Cells(StartCell, 9)
+'        MotorLoad.Snom_d = .Cells(StartCell, 10)
+'
+'        MotorLoad.minDcas_mm = .Cells(StartCell, 11)
+'        MotorLoad.minVliq_msec = .Cells(StartCell, 12)
+'        MotorLoad.NumSections = .Cells(StartCell, 13)
+'        MotorLoad.Length_m = .Cells(StartCell, 14)
+'        MotorLoad.M_kg = .Cells(StartCell, 15)
+'
+'        MotorLoad.Lambda_d = .Cells(StartCell, 16)
+'
+'
+'        MotorCollection.Add MotorLoad, CStr(currID)
+'
+'    End If
+'    i = i + 1
+'Loop Until currID = 0
+'End With
+End Sub
+Public Function getMotor(ID As Integer) As CESPMotor
+    
+On Error GoTo err1:
+    Set getMotor = MotorCollection.Item(CStr(ID))
+    
+Exit Function
+err1:
+    addLogMsg "ќшибка при загрузке из базы двигател€ ID = " & ID & " ."
+End Function

@@ -1,0 +1,9 @@
+Option Explicit
+Option Base 0
+Public p_isEmulsion As Boolean
+Public Property Get isEmulsion() As Boolean
+    isEmulsion = p_isEmulsion
+End Property
+Public Sub define_state(state As Boolean)
+    p_isEmulsion = state
+End Sub

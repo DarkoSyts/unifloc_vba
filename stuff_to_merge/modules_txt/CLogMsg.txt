@@ -1,0 +1,13 @@
+'=======================================================================================
+'Unifloc 7.6  Vulpes zerda                                           khabibullin.ra@gubkin.ru
+'Petroleum engineering calculations modules (macroses)
+'2000 - 2019
+'
+'=======================================================================================
+'
+' информация об ошибке для дальнейшей обработки
+' это единичная ошибка или предупреждение которое вылезло в ходе расчета
+Public ID As Long
+Public name As String
+Public TypeErr As String
+Public Rating As Double

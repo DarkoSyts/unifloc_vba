@@ -1,0 +1,78 @@
+'=======================================================================================
+'Unifloc 7.6  Vulpes zerda                                           khabibullin.ra@gubkin.ru
+'Petroleum engineering calculations modules (macroses)
+'2000 - 2019
+'
+'=======================================================================================
+' –абота со строками дл€ обеспечени€ удобства
+'
+'
+'
+'
+Option Explicit
+Public Function FormatInteger(i As Long, Optional W As Long = 0) As String
+    Dim tmp
+    If W <= 1 Then
+        FormatInteger = Format(i, "0")
+    Else
+        tmp = Format(i, String(W - 1, "#") & "0")
+        Do While Len(tmp) < W
+            tmp = " " & tmp
+        Loop
+        FormatInteger = tmp
+    End If
+End Function
+Public Function FormatFReal(R As Double, Optional W As Long = 0, Optional p As Long = 3) As String
+    Dim tmp
+    tmp = Format(R, "0." & String(p, "0"))
+    Do While Len(tmp) < W
+        tmp = " " & tmp
+    Loop
+    FormatFReal = tmp
+End Function
+Public Function FormatEReal(R As Double, Optional W As Long = 0, Optional p As Long = 3) As String
+    Dim tmp
+    tmp = Format(R, "0." & String(p, "0") & "E+0")
+    Do While Len(tmp) < W
+        tmp = " " & tmp
+    Loop
+    FormatEReal = tmp
+End Function
+'Public Sub ConsoleOutputString(s As String)
+'End Sub
+Public Function SplitTrim(ByVal s As String, ByVal Sep As String) As String()
+    Dim SPrev As String
+    s = Trim(s)
+    Do
+        SPrev = s
+        s = Replace(s, "  ", " ")
+    Loop Until s = SPrev
+    SplitTrim = Split(s, Sep)
+End Function
+Function VertArrayFromRange(rng As Range)
+     Dim arr_out() As Double
+     Dim i As Integer
+     Dim NumVal As Integer
+     NumVal = rng.Rows.Count
+     ReDim arr_out(NumVal - 1)
+     For i = 1 To NumVal
+        arr_out(i - 1) = rng.Value2(i, 1)
+     Next i
+     VertArrayFromRange = arr_out
+End Function
+Public Function s(val As Double) As String
+    s = Format(val, "0##.##")
+End Function
+Public Function Cdbl_(str_ As Variant) As Double
+On Error GoTo er1:
+    Cdbl_ = CDbl(str_)
+    Exit Function
+er1:
+    On Error GoTo er2:
+    Cdbl_ = CDbl(Replace(str_, ",", "."))
+    Exit Function
+er2:
+    On Error Resume Next:
+    Cdbl_ = CDbl(Replace(str_, ".", ","))
+    
+End Function

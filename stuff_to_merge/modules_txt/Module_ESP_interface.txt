@@ -1,0 +1,152 @@
+Sub Кнопка1_ЭЦН_графики()
+' функция обновления графиков для PVT калькулятора
+'
+'
+    ' объявим вспомогательные массивы для ускорения ввода вывода с листа
+    Dim q_list() As Variant
+    Dim head_list() As Variant
+    Dim power_list() As Variant
+    Dim eff_list() As Variant
+    
+    
+    Dim ESP As CESPpump
+    Dim ESPsys As CESPsystemSimple
+    
+    
+    Dim wc_perc As Double
+    Dim dp_list() As Variant
+    Dim q As Double
+    Dim Pin As Double
+    
+    
+    
+    Dim i As Integer  ' итератор
+    Dim viscosity As Double
+    viscosity_check = Range("viscosity").Value2  ' Задаваемая вручную вязкость
+    On Error Resume Next
+    ' инициализация вспомогательных массивов
+    ' для давлений считываются данные по которым будет расчет
+    ' для остальных параметров инициализируются только размеры, данные не используются
+    q_list = Range("ESP_rate_list_").Value2
+    ' лист с которого читаем диапазон давлений и по которому строятся графики разные
+    ' чтобы перестроение диапазона изменения давлений не испортило графики
+    head_list = Range("ESP_head_list_").Value2
+    power_list = Range("ESP_head_list_").Value2
+    eff_list = Range("ESP_head_list_").Value2
+    
+    ' массивы для анализа влияния увеличения вязкости
+    head_list_big = Range("ESP_head_list_").Value2
+    power_list_big = Range("ESP_head_list_").Value2
+    eff_list_big = Range("ESP_head_list_").Value2
+    ' массивы для анализа влияния увеличения ГФ
+    dp_list = Range("ESP_head_list_").Value2
+    dp_list_sm = Range("ESP_head_list_").Value2
+    dp_list_big = Range("ESP_head_list_").Value2
+    
+    eff_rp_list = Range("ESP_head_list_").Value2
+    eff_rp_list_sm = Range("ESP_head_list_").Value2
+    eff_rp_list_big = Range("ESP_head_list_").Value2
+    
+    power_rp_list = Range("ESP_head_list_").Value2
+    power_rp_list_sm = Range("ESP_head_list_").Value2
+    power_rp_list_big = Range("ESP_head_list_").Value2
+    
+    ' Обводненность
+    wc_perc = Range("PVT!wc_perc_").Value2
+    
+    Pin = Range("PVT!P_atma_").Value2
+    ' P,T исходные условия с листа PVT свойств
+    gamma_oil = Range("PVT!gamma_oil_").Value2
+    gamma_gas = Range("PVT!gamma_gas_").Value2
+    gamma_w = Range("PVT!gamma_w_").Value2
+    Rsb_m3m3 = Range("PVT!Rsb_m3m3").Value2
+    Tres_C = Range("PVT!Tres_C_").Value2
+    Pb_atma = Range("PVT!Pb_atma_").Value2
+    Bob_m3m3 = Range("PVT!Bob_m3m3_").Value2
+    mu_cP = Range("PVT!mu_cP_").Value2
+    Rp_m3m3 = Range("PVT!Rp_m3m3_").Value2
+    Ksep = Range("PVT!Ksep_").Value2
+    Psep_atma = Range("PVT!Psep_atma_").Value2
+    Tsep_c = Range("PVT!Tsep_C_").Value2
+    
+    rp_multiply = Range("rp_multiply").Value2
+    Tin_c = Range("PVT!T_C_").Value2
+    
+    
+    ESP_ID = Range("ESP_ID_").Value2
+    ESP_stages = Range("ESP_stages_").Value2
+    ESP_freq = Range("ESP_freq_").Value2
+    
+    Set ESP = getESP(ESP_ID)
+    ESP.StageNum = ESP_stages
+    ESP.freq_Hz = ESP_freq
+    ' Добавлены опциональные параметры (Вязкость, число ступеней) в функции для учета влияния вязкости на КПД
+    ' основной цикл расчета для построения графиков
+    For i = LBound(q_list) To UBound(q_list)
+        q = q_list(i, 1)
+        ' Паспортные характеристики
+        head_list(i, 1) = ESP.Get_ESP_Head_m(q, ESP_stages)
+        power_list(i, 1) = ESP.Get_ESP_Power_W(q, ESP_stages) / 1000
+        eff_list(i, 1) = ESP.Get_ESP_effeciency_fr(q)
+        
+        ' Влияние ГФ на перепад давления
+        dp_list(i, 1) = ESP_dP_atm(q, wc_perc, Pin, ESP_stages, ESP_freq, ESP_ID, _
+        gamma_gas, gamma_oil, gamma_w, Rsb_m3m3, Rp_m3m3, Pb_atma, Tres_C, Bob_m3m3, mu_cP, , Ksep, Psep_atma, Tsep_c, Tin_c)(0)
+        dp_list_sm(i, 1) = ESP_dP_atm(q, wc_perc, Pin, ESP_stages, ESP_freq, ESP_ID, _
+        gamma_gas, gamma_oil, gamma_w, Rsb_m3m3 / rp_multiply, Rp_m3m3 / rp_multiply, Pb_atma, Tres_C, Bob_m3m3, mu_cP, , Ksep, Psep_atma, Tsep_c, Tin_c)(0)
+        dp_list_big(i, 1) = ESP_dP_atm(q, wc_perc, Pin, ESP_stages, ESP_freq, ESP_ID, _
+        gamma_gas, gamma_oil, gamma_w, Rsb_m3m3 * rp_multiply, Rp_m3m3 * rp_multiply, Pb_atma, Tres_C, Bob_m3m3, mu_cP, , Ksep, Psep_atma, Tsep_c, Tin_c)(0)
+        ' Влияние ГФ на КПД
+        eff_rp_list(i, 1) = ESP_dP_atm(q, wc_perc, Pin, ESP_stages, ESP_freq, ESP_ID, _
+        gamma_gas, gamma_oil, gamma_w, Rsb_m3m3, Rp_m3m3, Pb_atma, Tres_C, Bob_m3m3, mu_cP, , Ksep, Psep_atma, Tsep_c, Tin_c)(4)
+        eff_rp_list_sm(i, 1) = ESP_dP_atm(q, wc_perc, Pin, ESP_stages, ESP_freq, ESP_ID, _
+        gamma_gas, gamma_oil, gamma_w, Rsb_m3m3 / rp_multiply, Rp_m3m3 / rp_multiply, Pb_atma, Tres_C, Bob_m3m3, mu_cP, , Ksep, Psep_atma, Tsep_c, Tin_c)(4)
+        eff_rp_list_big(i, 1) = ESP_dP_atm(q, wc_perc, Pin, ESP_stages, ESP_freq, ESP_ID, _
+        gamma_gas, gamma_oil, gamma_w, Rsb_m3m3 * rp_multiply, Rp_m3m3 * rp_multiply, Pb_atma, Tres_C, Bob_m3m3, mu_cP, , Ksep, Psep_atma, Tsep_c, Tin_c)(4)
+        ' Влияние ГФ на потребляемую мощность
+        power_rp_list(i, 1) = ESP_dP_atm(q, wc_perc, Pin, ESP_stages, ESP_freq, ESP_ID, _
+        gamma_gas, gamma_oil, gamma_w, Rsb_m3m3, Rp_m3m3, Pb_atma, Tres_C, Bob_m3m3, mu_cP, , Ksep, Psep_atma, Tsep_c, Tin_c)(2) / 1000
+        power_rp_list_sm(i, 1) = ESP_dP_atm(q, wc_perc, Pin, ESP_stages, ESP_freq, ESP_ID, _
+        gamma_gas, gamma_oil, gamma_w, Rsb_m3m3 / rp_multiply, Rp_m3m3 / rp_multiply, Pb_atma, Tres_C, Bob_m3m3, mu_cP, , Ksep, Psep_atma, Tsep_c, Tin_c)(2) / 1000
+        power_rp_list_big(i, 1) = ESP_dP_atm(q, wc_perc, Pin, ESP_stages, ESP_freq, ESP_ID, _
+        gamma_gas, gamma_oil, gamma_w, Rsb_m3m3 * rp_multiply, Rp_m3m3 * rp_multiply, Pb_atma, Tres_C, Bob_m3m3, mu_cP, , Ksep, Psep_atma, Tsep_c, Tin_c)(2) / 1000
+      
+    Next i
+    
+    For i = LBound(q_list) To UBound(q_list)
+        q = q_list(i, 1)
+        head_list_big(i, 1) = ESP.Get_ESP_Head_m(q, ESP_stages, viscosity_check)
+        power_list_big(i, 1) = ESP.Get_ESP_Power_W(q, ESP_stages, viscosity_check) / 1000
+        eff_list_big(i, 1) = ESP.Get_ESP_effeciency_fr(q, viscosity_check)
+        
+    Next i
+    ' записываем расчитанные параметры обратно на лист
+    Range("ESP_head_list_") = head_list
+    Range("ESP_power_list_") = power_list
+    Range("ESP_eff_list_") = eff_list
+    
+    
+    Range("ESP_head_list_mu_bigger") = head_list_big
+    Range("ESP_power_list_mu_bigger") = power_list_big
+    Range("ESP_eff_list_mu_bigger") = eff_list_big
+    
+    
+    Range("ESP_list_dP") = dp_list
+    Range("ESP_list_dP_smaller") = dp_list_sm
+    Range("ESP_list_dP_bigger") = dp_list_big
+    
+    [Rp_m3m3_smaller] = Rp_m3m3 / rp_multiply
+    [Rp_m3m3_bigger] = Rp_m3m3 * rp_multiply
+    
+    [eff_rp_list_] = eff_rp_list
+    [eff_rp_list_smaller] = eff_rp_list_sm
+    [eff_rp_list_bigger] = eff_rp_list_big
+    
+    [power_rp_list_] = power_rp_list
+    [power_rp_list_smaller] = power_rp_list_sm
+    [power_rp_list_bigger] = power_rp_list_big
+    
+   
+    
+    
+End Sub

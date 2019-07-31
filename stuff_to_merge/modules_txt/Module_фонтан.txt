@@ -1,0 +1,504 @@
+'Option Explicit
+Private Sub LoadPVT(well As CWell)
+    Dim PVT As CPVT
+    Dim sheet_name
+    
+    
+    Set PVT = NewCPVT()
+    ' читаем исходные данные PVT модели для проведения расчетов
+    sheet_name = "PVT"
+          
+    PVT.gamma_g = Range(sheet_name & "!gamma_gas_").Value2
+    PVT.gamma_o = Range(sheet_name & "!gamma_oil_").Value2
+    PVT.gamma_w = Range(sheet_name & "!gamma_w_").Value2
+    
+    PVT.Tres_C = Range(sheet_name & "!Tres_C_").Value2
+    Call PVT.SetRpRsb(Range(sheet_name & "!Rp_m3m3_").Value2, Range(sheet_name & "!Rsb_m3m3_").Value2)
+    PVT.Pb_atma = Range(sheet_name & "!Pb_atma_").Value2
+    
+    PVT.PVT_CORRELATION = Range(sheet_name & "!PVT_correlation_").Value2
+    
+    PVT.Qliq_scm3day = Range(sheet_name & "!Ql_scm3day_").Value2
+    PVT.wc_perc = Range(sheet_name & "!wc_perc_").Value2
+    PVT.Bob_m3m3 = Range(sheet_name & "!Bob_m3m3_").Value2
+    PVT.Muob_cP = Range(sheet_name & "!mu_cP_").Value2
+    ' считываем Ksep и при необходимости модифицируем флюид
+    
+    Ksep = Range(sheet_name & "!Ksep_").Value2
+    Psep = Range(sheet_name & "!Psep_atma_").Value2
+    Tsep = Range(sheet_name & "!Tsep_C_").Value2
+    If Ksep > 0 And Ksep <= 1 And Psep > 0 And Tsep > 0 Then
+        Call PVT.ModAfterSeparation(Psep, Tsep, Ksep, GasGoesIntoSolution)
+    End If
+    Set well.Fluid = PVT
+End Sub
+'Private Sub LoadWell(well As CWell)
+'
+'    Hperf_ = Range("Hperf_m_").Value2
+'    Htub_ = Range("Htub_m_").Value2
+'    dcas_ = Range("dcas_mm_").Value2
+'    dtub_ = Range("dtub_mm_").Value2
+'    dchoke_ = Range("dchoke_mm_").Value2
+'    tbh_ = Range("Tbh_C_").Value2
+'    twh_ = Range("Twh_C_").Value2
+'
+'
+'    Set Incl_Hmes_ = Range("Hmes_Incl_m_")
+'    Set Incl_Hvert_ = Range("Hvert_Incl_m_")
+'    Call well.InitWellRange(Incl_Hmes_, Incl_Hvert_, Hperf_, Htub_, dcas_, dtub_, tbh_, twh_)
+'
+'    well.HFlowCorrelation = hydrCorr
+'    well.TempCorrelation = StartEndTemp ' AmbientTemp
+'
+'    well.choke.Dchoke_m = dchoke_ / 1000
+'    well.choke.Ddown_m = dtub_ / 1000
+'    well.choke.Dup_m = dtub_ / 1000
+'
+'    Pbuf_ = Range("Pbuf_atma_").Value2
+'
+'End Sub
+Private Sub LoadWellAll(well As CWell)
+    Hperf_ = Range("Hperf_m_").Value2
+    Htub_ = Range("Htub_m_").Value2
+    dcas_ = Range("dcas_mm_").Value2
+    dtub_ = Range("dtub_mm_").Value2
+    dchoke_ = Range("dchoke_mm_").Value2
+    tbh_ = Range("Tbh_C_").Value2
+    twh_ = Range("Twh_C_").Value2
+    
+ 
+    Set Incl_Hmes_ = Range("Hmes_Incl_m_")
+    Set Incl_Hvert_ = Range("Hvert_Incl_m_")
+    
+    Call well.InitWellRangeAll(Range("Hmes_Incl_m_"), Range("Hvert_Incl_m_"), _
+                               Range("hmes_dcas_m_"), Range("dcas_arr_mm_"), _
+                               Range("hmes_dtub_m_"), Range("dtub_arr_mm_"), _
+                               Range("hmes_tamb_m_"), Range("tamb_C_"))
+    
+    
+    
+    well.HFlowCorrelation = Range("correlation_MF_fontan_").Value2
+    well.Fluid.PVT_CORRELATION = Range("correlation_PVT_fontan_").Value2
+    well.TempCorrelation = Range("correlation_T_fontan_").Value2
+    
+    If well.TempCorrelation = StartEndTemp Then
+        Call well.InitTempLinear(tbh_, twh_)
+    End If
+    well.FastCalc = False
+    
+    well.choke.Dchoke_m = dchoke_ / 1000
+    well.choke.Ddown_m = dtub_ / 1000
+    well.choke.Dup_m = dtub_ / 1000
+    
+    Pbuf_ = Range("Pbuf_atma_").Value2
+    Pcas_ = Range("Pcas_atma_").Value2
+    well.Pan_atma = Pcas_
+    
+    Call ReadMes
+    
+    numpt = Range("hmes_tamb_out_m_").Rows.Count
+ '   well.AmbientForm.AmbTempCurve.xName = "hmes tamb"
+ '   well.AmbientForm.AmbTempCurve.yName = "tamb"
+ '   Call well.AmbientForm.AmbTempCurve.ClonePointsToNum(NumPt).WriteToVertRange(Range("hmes_tamb_out_m_"), Range("tamb_out_C_"))
+    
+    
+    
+    well.betta_grav = [betta_grav_].Value2
+    well.betta_fric = [betta_fric_].Value2
+End Sub
+Sub Кнопка52_Расчет_снизу_вверх()
+' чтение данных по скважине с УЭЦН
+    Dim cor As Double
+    Dim well As CWell
+    Dim PVT As CPVT
+    Dim method_with_emulsion As Boolean
+    cor = [cor_Emulsion].Value2
+    If [calc_with_emulsion] = 1 Then
+        method_with_emulsion = True
+    Else
+        method_with_emulsion = False
+    End If
+    
+    getLogObject.ClearAll
+    addLogMsg_debug "запуск расчета снизу вверх"
+    
+    Set well = NewWell()
+    Call LoadPVT(well)
+    Call LoadWellAll(well)
+    
+    Pwf_ = Range("Pwf_atma_").Value2
+    tbh_ = Range("Tbh_C_").Value2
+    'Dim i As Integer
+    ' прочитаем все про УЭЦН
+    Dim ESP As CESPsystemSimple
+    Set ESP = NewESPsys()
+     
+    ESP_ID = Range("ESP_ID_").Value2
+    Set ESP.ESPpump = getESP(ESP_ID)
+    ESP.ESPpump.StageNum = Range("ESP_stages_").Value2
+    ESP.ESPpump.freq_Hz = Range("ESP_freq_").Value2
+    ESP.HmesTop_m = Range("Hpump_").Value2
+    ESP.Power_nom_W = [Power_motor_nom_kWt_].Value2 * 1000
+    'ESP.ESPpump.PressureDegradation = [p_PressureDegradation_].Value2
+    ESP.ESPPressureDegradation = [p_PressureDegradation_].Value2
+    ESP.ESPpump.RateDegradation = [p_RateDegradation_].Value2
+    ESP.power_degr_fr = [power_degr_fr_].Value2
+    ESP.cos_phi = [cos_phi_].Value2
+    ESP.U_V = [U_V_].Value2
+    ESP.motor_eff_fr = [motor_eff_fr_].Value2
+    Set ESP.Fluid = well.Fluid
+    Set well.ESP = ESP
+    
+    addLogMsg_debug "все прочитали"
+    tt = Timer
+    
+    'For i = 1 To 100
+        Call well.Calc_Plin_Pwf_atma(SetPT(Pwf_, tbh_), CalcCasing:=True, calcESPtemp:=True, _
+                                    saveCurve:=allCurves, with_Emulsion:=method_with_emulsion, cor_Emulsion:=cor)
+    'Next i
+    addLogMsg_debug "все подсчитали ", Str((Timer - tt))
+    'MsgBox (Timer - tt)
+    Call ResPlot(well)
+    
+    addLogMsg_debug "все записали ", Str((Timer - tt))
+    getLogObject.SaveToFile
+End Sub
+Sub Кнопка52_Расчет_сверху_вниз()
+' чтение данных по фонтанных скважинах
+    
+    getLogObject.ClearAll
+    addLogMsg_debug "запуск расчета cверху вниз"
+    tt = Timer
+    Dim well As CWell
+    
+    
+    Dim method_with_emulsion As Boolean
+    
+    If [calc_with_emulsion] = 1 Then
+        method_with_emulsion = True
+    Else
+        method_with_emulsion = False
+    End If
+    
+    Set well = NewWell()
+    Call LoadPVT(well)
+    Call LoadWellAll(well)
+        ' прочитаем все про УЭЦН
+    Dim ESP As CESPsystemSimple
+    Set ESP = NewESPsys()
+     
+    ESP_ID = Range("ESP_ID_").Value2
+    Set ESP.ESPpump = getESP(ESP_ID)
+    ESP.ESPpump.StageNum = Range("ESP_stages_").Value2
+    ESP.ESPpump.freq_Hz = Range("ESP_freq_").Value2
+    ESP.HmesTop_m = Range("Hpump_").Value2
+    ESP.Power_nom_W = [Power_motor_nom_kWt_].Value2 * 1000
+    'ESP.ESPpump.PressureDegradation = [p_PressureDegradation_].Value2
+    ESP.ESPPressureDegradation = [p_PressureDegradation_].Value2
+    ESP.ESPpump.RateDegradation = [p_RateDegradation_].Value2
+    ESP.power_degr_fr = [power_degr_fr_].Value2
+    ESP.cos_phi = [cos_phi_].Value2
+    ESP.U_V = [U_V_].Value2
+    ESP.motor_eff_fr = [motor_eff_fr_].Value2
+    Set ESP.Fluid = well.Fluid
+    Set well.ESP = ESP
+    addLogMsg_debug "все прочитали"
+    Pbuf_ = Range("Pline_atma_").Value2
+    tbh_ = Range("Tbh_C_").Value2
+   
+    Call well.Calc_Pwf_Plin_atma(Pbuf_, tbh_, fast:=True, saveCurve:=allCurves, calcESPtemp:=True, _
+                                CalcCasing:=True, with_Emulsion:=method_with_emulsion)
+    
+    addLogMsg_debug "все подсчитали ", Str((Timer - tt))
+    Call ResPlot(well)
+    
+    addLogMsg_debug "все записали ", Str((Timer - tt))
+    getLogObject.SaveToFile
+    
+End Sub
+Sub test_write_on_sheet(Ql_scm3day As Variant)
+    [Ql_scm3day_] = Ql_scm3day
+End Sub
+Sub write_on_sheet(Ql_scm3day As Variant, _
+                    wc_perc As Variant, _
+                    Rp_m3m3 As Variant, _
+                    P_intake_in_atma As Variant, _
+                    Pline_atma As Variant, _
+                    Pbuf_atma As Variant, _
+                    Pwf_atma As Variant, _
+                    Pcas_atma As Variant, _
+                    I_motor_nom_A_in As Variant, _
+                    Power_motor_nom_kWt As Variant, _
+                    I_motor_A_in_ As Variant, _
+                    cos_phi As Variant, _
+                    load_motor_in_d_ As Variant, _
+                    U_V As Variant, _
+                    act_power_cs_kwt_in_ As Variant)
+    [Ql_scm3day_] = Ql_scm3day
+    [wc_perc_] = wc_perc
+    [Rp_m3m3_] = Rp_m3m3
+    
+    [P_intake_in_atma_] = P_intake_in_atma
+    [Pline_atma_] = Pline_atma
+    [Pbuf_atma_] = Pbuf_atma
+    [Pwf_atma_] = Pwf_atma
+    [Pcas_atma_] = Pcas_atma
+    
+    [I_motor_nom_A_in_] = I_motor_nom_A_in
+    [Power_motor_nom_kWt_] = Power_motor_nom_kWt
+    [I_motor_A_in] = I_motor_A_in_
+    [cos_phi_] = cos_phi
+    [load_motor_in_d] = load_motor_in_d_
+    [U_V_] = U_V
+    [act_power_cs_kwt_in] = act_power_cs_kwt_in_
+    
+    
+End Sub
+Public Function get_data() As Variant
+        getLogObject.ClearAll
+    addLogMsg_debug "запуск расчета cверху вниз"
+    tt = Timer
+    Dim well As CWell
+    
+    
+    Dim method_with_emulsion As Boolean
+    
+    If [calc_with_emulsion] = 1 Then
+        method_with_emulsion = True
+    Else
+        method_with_emulsion = False
+    End If
+    
+    Set well = NewWell()
+    Call LoadPVT(well)
+    Call LoadWellAll(well)
+        ' прочитаем все про УЭЦН
+    Dim ESP As CESPsystemSimple
+    Set ESP = NewESPsys()
+     
+    ESP_ID = Range("ESP_ID_").Value2
+    Set ESP.ESPpump = getESP(ESP_ID)
+    ESP.ESPpump.StageNum = Range("ESP_stages_").Value2
+    ESP.ESPpump.freq_Hz = Range("ESP_freq_").Value2
+    ESP.HmesTop_m = Range("Hpump_").Value2
+    ESP.Power_nom_W = [Power_motor_nom_kWt_].Value2 * 1000
+    'ESP.ESPpump.PressureDegradation = [p_PressureDegradation_].Value2
+    ESP.ESPPressureDegradation = [p_PressureDegradation_].Value2
+    ESP.ESPpump.RateDegradation = [p_RateDegradation_].Value2
+    ESP.power_degr_fr = [power_degr_fr_].Value2
+    ESP.cos_phi = [cos_phi_].Value2
+    ESP.U_V = [U_V_].Value2
+    ESP.motor_eff_fr = [motor_eff_fr_].Value2
+    Set ESP.Fluid = well.Fluid
+    Set well.ESP = ESP
+    addLogMsg_debug "все прочитали"
+    Pbuf_ = Range("Pline_atma_").Value2
+    tbh_ = Range("Tbh_C_").Value2
+   
+    Call well.Calc_Pwf_Plin_atma(Pbuf_, tbh_, fast:=True, saveCurve:=allCurves, calcESPtemp:=True, _
+                                CalcCasing:=True, with_Emulsion:=method_with_emulsion)
+    'get_data = well.Tint_C
+    
+    Dim ar_val(35) As Double
+    Dim ar_titles(35) As String
+    Dim k As Double
+    k = 1000
+    Dim i As Integer
+    i = 0
+    ar_titles(i) = "PVT.Qliq_scm3day":  ar_val(i) = well.Fluid.Qliq_m3day
+    i = i + 1
+    ar_titles(i) = "PVT.wc_perc":  ar_val(i) = well.Fluid.wc_perc
+    i = i + 1
+    ar_titles(i) = "PVT.Rp_m3m3":  ar_val(i) = well.Fluid.Rp_m3m3
+    i = i + 1
+    ar_titles(i) = "Pwf_":  ar_val(i) = Pwf_
+    i = i + 1
+    ar_titles(i) = "tbh_":  ar_val(i) = tbh_
+    i = i + 1
+    ar_titles(i) = "ESP.ESPpump.freq_Hz":  ar_val(i) = ESP.ESPpump.freq_Hz
+    i = i + 1
+    ar_titles(i) = "ESP.Power_nom_W":  ar_val(i) = ESP.Power_nom_W
+    i = i + 1
+    ar_titles(i) = "ESP.cos_phi":  ar_val(i) = ESP.cos_phi
+    i = i + 1
+    ar_titles(i) = "ESP.U_V":  ar_val(i) = ESP.U_V
+    i = i + 1
+    ar_titles(i) = "ESP.motor_eff_fr":  ar_val(i) = ESP.motor_eff_fr
+    i = i + 1
+    ar_titles(i) = "ESP.ESPPressureDegradation":  ar_val(i) = ESP.ESPPressureDegradation
+    i = i + 1
+    ar_titles(i) = "ESP.ESPpump.RateDegradation":  ar_val(i) = ESP.ESPpump.RateDegradation
+    i = i + 1
+    ar_titles(i) = "ESP.power_degr_fr":  ar_val(i) = ESP.power_degr_fr
+    i = i + 1
+    ar_titles(i) = "Разделитель данных":  ar_val(i) = 0
+    i = i + 1
+    ar_titles(i) = "well.Pline_atma":  ar_val(i) = well.Pline_atma
+    i = i + 1
+    ar_titles(i) = "well.Pwf_atma":  ar_val(i) = well.Pwf_atma
+    i = i + 1
+    ar_titles(i) = "well.Tline_C":  ar_val(i) = well.Tline_C
+    i = i + 1
+    ar_titles(i) = "well.Twh_C":  ar_val(i) = well.Twh_C
+    i = i + 1
+    ar_titles(i) = "well.Tbh_C":  ar_val(i) = well.Tbh_C
+    i = i + 1
+    ar_titles(i) = "well.ESP.ESPpump.EffiencyESP_d":  ar_val(i) = well.ESP.ESPpump.EffiencyESP_d
+    i = i + 1
+    ar_titles(i) = "well.ESP.efficency_ESP_total_d":  ar_val(i) = well.ESP.efficency_ESP_total_d
+    i = i + 1
+    ar_titles(i) = "well.Pdis_atma":  ar_val(i) = well.Pdis_atma
+    i = i + 1
+    ar_titles(i) = "well.Pint_atma":  ar_val(i) = well.Pint_atma
+    i = i + 1
+    ar_titles(i) = "well.Tint_C":  ar_val(i) = well.Tint_C
+    i = i + 1
+    ar_titles(i) = "well.ESP.Power_shaft_W / k":  ar_val(i) = well.ESP.Power_shaft_W / k
+    i = i + 1
+    ar_titles(i) = "well.ESP.Power_motor_W / k":  ar_val(i) = well.ESP.Power_motor_W / k
+    i = i + 1
+    ar_titles(i) = "well.ESP.ESPpump.PowerFluid_Wt / k":  ar_val(i) = well.ESP.ESPpump.PowerFluid_Wt / k
+    i = i + 1
+    ar_titles(i) = "well.ESP.cable_Power_W / k":  ar_val(i) = well.ESP.cable_Power_W / k
+    i = i + 1
+    ar_titles(i) = "well.ESP.Power_CS_calc_W / k":  ar_val(i) = well.ESP.Power_CS_calc_W / k
+    i = i + 1
+    ar_titles(i) = "well.ESP.cable_dPower_W / k":  ar_val(i) = well.ESP.cable_dPower_W / k
+    i = i + 1
+    ar_titles(i) = "well.ESP.dPower_GasSep_W / k":  ar_val(i) = well.ESP.dPower_GasSep_W / k
+    i = i + 1
+    ar_titles(i) = "well.ESP.dPower_protector_W / k":  ar_val(i) = well.ESP.dPower_protector_W / k
+    i = i + 1
+    ar_titles(i) = "well.ESP.dPower_transform_W / k":  ar_val(i) = well.ESP.dPower_transform_W / k
+    i = i + 1
+    ar_titles(i) = "well.ESP.I_A":  ar_val(i) = well.ESP.I_A
+    i = i + 1
+    ar_titles(i) = "well.ESP.ESPpump.PowerESP_Wt / k":  ar_val(i) = well.ESP.ESPpump.PowerESP_Wt / k
+    i = i + 1
+    
+    
+    get_data = Array(ar_val, ar_titles)
+End Function
+Private Sub ResPlot(well As CWell)
+    Dim k As Double
+    k = 1000
+    numpt = Range("Tout_Hmes_m_").Rows.Count
+    Call well.Curve(str_PtubHmes_curve).WriteToRange(Range("Pout_Hmes_m_"), Range("Pout_atma_"), numpt)
+    Call well.Curve(str_TtubHmes_curve).WriteToRange(Range("Tout_Hmes_m_"), Range("Tout_C_"), numpt)
+    Call well.Curve(str_HlHmes_curve).WriteToRange(Range("Hlout_Hmes_m_"), Range("Hlout_"), numpt)
+    Call well.Curve(str_TambHmes_curve).WriteToRange(Range("hmes_tamb_out_m_"), Range("tamb_out_C_"), numpt)
+    Call well.Curve(str_PcasHmes_curve).WriteToRange(Range("Pcas_hmes_"), Range("Pcas_out_atma_"), numpt)
+    Call well.Curve(str_mumixTubCurve).WriteToRange(Range("MuMix_hmes_"), Range("MuMix_out_cP_"), numpt)
+    [Pline_out_atma_] = well.Pline_atma
+    [Pbuf_out_atma_] = well.Pbuf_atma
+    [Pwf_out_atma_] = well.Pwf_atma
+    [Tline_out_C_] = well.Tline_C
+    [Tbuf_out_C_] = well.Twh_C
+    [Twf_out_C_] = well.Tbh_C
+    Dim k_for_pump_points As Double
+    k_num = well.ESP.ESPpump.c_EffESPInPumpCurve.numPoints
+       
+    Call well.ESP.ESPpump.c_EffESPInPumpCurve.WriteToRange(Range("out_1"), Range("out_2"), k_num)
+    Call well.ESP.ESPpump.c_GasFractionInPumpCurve.WriteToRange(Range("out_1"), Range("out_3"), k_num)
+    Call well.ESP.ESPpump.c_PowerESPInPumpCurve.WriteToRange(Range("out_1"), Range("out_4"), k_num)
+    Call well.ESP.ESPpump.c_PowerFluidInPumpCurve.WriteToRange(Range("out_1"), Range("out_5"), k_num)
+    Call well.ESP.ESPpump.c_PressureInPumpCurve.WriteToRange(Range("out_1"), Range("out_6"), k_num)
+    Call well.ESP.ESPpump.c_QmixInPumpCurve.WriteToRange(Range("out_1"), Range("out_7"), k_num)
+    Call well.ESP.ESPpump.c_TempInPumpCurve.WriteToRange(Range("out_1"), Range("out_8"), k_num)
+    Call well.ESP.ESPpump.c_MuMixInPumpCurve.WriteToRange(Range("out_1"), Range("out_9"), k_num)
+    
+     ' Вывод дополнительных значений
+    [EffESP_out_d] = well.ESP.ESPpump.EffiencyESP_d
+    [efficency_ESP_total_out_d] = well.ESP.efficency_ESP_total_d
+    [P_dis_atma] = well.Pdis_atma
+    [Pint_atma] = well.Pint_atma
+    [Tint_C] = well.Tint_C
+    [Tdis_C] = well.Tdis_C
+    
+    [Power_shaft_out] = well.ESP.Power_shaft_W / k
+    [Power_motor_out] = well.ESP.Power_motor_W / k
+    [PowerFliud_out_] = well.ESP.ESPpump.PowerFluid_Wt / k
+    [Power_in_cable_out] = well.ESP.cable_Power_W / k
+    [Power_CS_out] = well.ESP.Power_CS_calc_W / k
+    [cable_dPower_out] = well.ESP.cable_dPower_W / k
+    [dPower_CS_out] = well.ESP.dPower_CS_W / k
+    [dPower_GasSep_out] = well.ESP.dPower_GasSep_W / k
+    [dPower_protector_out] = well.ESP.dPower_protector_W / k
+    [dPower_transform_out] = well.ESP.dPower_transform_W / k
+    [I_out_A] = well.ESP.I_A
+    '[Load_fr_out] = well.ESP.Load_fr
+    [p_PowerESP_out_Wt] = well.ESP.ESPpump.PowerESP_Wt / k
+    
+End Sub
+Private Sub LoadMes(ByVal pmes_curve As TInterpolation, ByVal tmes_curve As TInterpolation)
+    Call pmes_curve.LoadFromVertRange(Range("Hmes_mes_m_"), Range("P_mes_atma_"))
+    Call tmes_curve.LoadFromVertRange(Range("Hmes_mes_m_"), Range("T_mes_C_"))
+End Sub
+Sub ReadMes()
+' процедура чтения данных замеров давления и температуры и подготовки для отображения
+    Dim pmes_curve As TInterpolation
+    Dim tmes_curve As TInterpolation
+    
+    Set pmes_curve = NewCurve()
+    Set tmes_curve = NewCurve()
+    
+    Call LoadMes(pmes_curve, tmes_curve)
+    numpt = Range("Hmes_out_").Rows.Count
+    'Call pmes_curve.WriteToRange(Range("hmes_out_"), Range("Pmes_out_"), numpt)
+    'Call tmes_curve.WriteToRange(Range("hmes_out_"), Range("tmes_out_"), numpt)
+    
+    
+End Sub
+Sub Проверка_конструкции_фонтан()
+    Dim incl_curve As TInterpolation
+    Dim incl1_curve As TInterpolation
+    Dim incl_udl_curve As TInterpolation
+    Dim tamb_curve As TInterpolation
+    Dim dcas_curve As TInterpolation
+    Dim dtub_curve As TInterpolation
+    
+On Error GoTo er1:
+    
+    Set incl_curve = NewCurve()
+    Set incl1_curve = NewCurve()
+    Set tamb_curve = NewCurve()
+    Set dcas_curve = NewCurve()
+    dcas_curve.isStepFunction = True
+    Set dtub_curve = NewCurve()
+    dtub_curve.isStepFunction = True
+    
+    
+    numpt = Range("hmes_incl_out_m_").Rows.Count
+    Call incl_curve.LoadFromVertRange(Range("Hmes_Incl_m_"), Range("Hvert_Incl_m_"))
+    Call incl1_curve.LoadFromVertRange(Range("Hmes_Incl_m_"), Range("Hmes_Incl_m_"))
+    Set incl_udl_curve = SubtractCurve(incl1_curve, incl_curve)
+    
+    incl_udl_curve.xName = "hmes"
+    incl_udl_curve.yName = "udl"
+    Call incl_curve.WriteToRange(Range("hmes_incl_out_m_"), Range("hvert_incl_out_m_"), numpt)
+    incl_curve.xName = "hmes"
+    incl_curve.yName = "hvert"
+    Call incl_udl_curve.WriteToRange(Range("hmes_incl_out_m_"), Range("udl_out_m_"), numpt)
+    numpt = Range("hmes_tamb_out_m_").Rows.Count
+    Call tamb_curve.LoadFromVertRange(Range("hmes_tamb_m_"), Range("tamb_C_"))
+    tamb_curve.xName = "hvert"
+    tamb_curve.yName = "tamb"
+    Call tamb_curve.WriteToRange(Range("hmes_tamb_out_m_"), Range("tamb_out_C_"), numpt)
+    numpt = Range("hmes_dcas_out_m_").Rows.Count
+    Call dcas_curve.LoadFromVertRange(Range("hmes_dcas_m_"), Range("dcas_arr_mm_"))
+    dcas_curve.xName = "hmes"
+    dcas_curve.yName = "dcas"
+    Call dcas_curve.WriteToRange(Range("hmes_dcas_out_m_"), Range("dcas_out_mm_"), numpt)
+    
+    numpt = Range("hmes_dtub_out_m_").Rows.Count
+    Call dtub_curve.LoadFromVertRange(Range("hmes_dtub_m_"), Range("dtub_arr_mm_"))
+    dtub_curve.xName = "hmes"
+    dtub_curve.yName = "dtub"
+    Call dtub_curve.WriteToRange(Range("hmes_dtub_out_m_"), Range("dtub_out_mm_"), numpt)
+    
+    Exit Sub
+er1:
+    MsgBox "что то не так пошло"
+    Resume Next
+    
+End Sub
