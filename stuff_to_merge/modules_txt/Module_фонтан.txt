@@ -233,7 +233,8 @@ Sub write_on_sheet(Ql_scm3day As Variant, _
                     cos_phi As Variant, _
                     load_motor_in_d_ As Variant, _
                     U_V As Variant, _
-                    act_power_cs_kwt_in_ As Variant)
+                    act_power_cs_kwt_in_ As Variant, _
+                    t_intake_c As Variant)
     [Ql_scm3day_] = Ql_scm3day
     [wc_perc_] = wc_perc
     [Rp_m3m3_] = Rp_m3m3
@@ -251,6 +252,7 @@ Sub write_on_sheet(Ql_scm3day As Variant, _
     [load_motor_in_d] = load_motor_in_d_
     [U_V_] = U_V
     [act_power_cs_kwt_in] = act_power_cs_kwt_in_
+    [T_intake_in] = t_intake_c
     
     
 End Sub
