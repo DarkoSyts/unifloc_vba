@@ -30,6 +30,7 @@ end_string_for_module = "End Sub"
 file_name_for_report_str = "report"
 file_name_for_all_stuff = "all_stuff"
 file_name_for_description_module = "u7_descriptions"
+file_name_for_python_api = "python_api.py"
 
 """
 string for specific VBA format of description
@@ -41,18 +42,36 @@ description_string = "      Description:="
 category_string = "     Category:=\"u7\", _\n"
 argument_descriptions_string = "     ArgumentDescriptions:=Array("
 connect_to_next_string_in_array = ", _\n"
+"""
+strings for python API
+"""
+tab_str = "    "
+start_classes_str = "import xlwings as xw\n" \
+                "addin_name_str = \"UniflocVBA_7.xlam\"\n" \
+                "class API():\n" \
+                "" + tab_str + "def __init__(self, addin_name_str):\n" \
+                               "" + 2 * tab_str + "book = xw.Book(addin_name_str)\n"
+create_class_str = "UniflocVBA = API(addin_name_str)\n"
 
+API_func_str = ""
+
+def append_func_in_API_func_str(filled_str, VBA_func_name):
+    str_to_append = 2 * tab_str +"self." + VBA_func_name + " = book.macro(\"" + VBA_func_name + "\")\n"
+    new_str = filled_str + str_to_append
+    return new_str
 
 class VBA_Func_Header:
     """
     class representing vba function header
     """
 
-    def __init__(self, func_name):
+    def __init__(self, func_name, file_name_for_python_api = file_name_for_python_api):
         self.func_name = func_name.lstrip()
         self.str_desc = ''
         self.num_line = 0
         self.lines = []
+        self.API_func_str = ""
+        self.file_name_for_python_api = file_name_for_python_api
 
     def edit_string(self, string):
         """
@@ -86,6 +105,7 @@ class VBA_Func_Header:
         :param path:
         :return: None
         """
+        fname_api = path + '/' + self.file_name_for_python_api
         fname = path + '/' + self.func_name + ".txt"
         fname2 = path + '/' + file_name_for_all_stuff + ".txt"
         print(fname)
@@ -105,6 +125,10 @@ class VBA_Func_Header:
         """
         result_lines.insert(1, macro_string + "\"" + self.func_name + "\"" + connect_to_next_string_in_array)
 
+        """
+        addition of function name in python API 
+        """
+        self.API_func_str = append_func_in_API_func_str(self.API_func_str, self.func_name)
         """
         preparing and editing of short function description above declaration of function
         """
@@ -365,7 +389,14 @@ class VBA_Func_Header:
         f3_report.writelines([report])
         f3_report.close()
 
-
+        """
+        create python api file 
+        """
+        py_result = start_classes_str + self.API_func_str + create_class_str
+        file_name_for_python_api = path_listings_out + '/' + self.file_name_for_python_api
+        f4_api = open(file_name_for_python_api, "a", encoding='UTF-8')
+        f4_api.writelines([self.API_func_str])
+        f4_api.close()
         """
         create file with one function in needed format
         """
@@ -435,7 +466,13 @@ f3_report = open(fname_report, "w", encoding='UTF-8')
 f3_report.writelines([""])
 f3_report.close()
 
-
+"""
+create file for python API and clear it
+"""
+file_name_for_python_api_woth_path = path_listings_out + '/' + file_name_for_python_api
+python_api = open(file_name_for_python_api_woth_path, "w", encoding='UTF-8')
+python_api.writelines([""])
+python_api.close()
 """
 description generation start
 extract function with description markers
@@ -460,3 +497,18 @@ f3_module_txt.writelines([end_string_for_module])
 f3_module_txt.close()
 f2.close()
 print("description module generated in " + f3_module_txt.name)
+
+"""
+create python api file with required format
+"""
+
+file_name_for_python_api_woth_path = path_listings_out + '/' + file_name_for_python_api
+python_api = open(file_name_for_python_api_woth_path, "r", encoding='UTF-8')
+generated_api_lines = python_api.read()
+python_api.close()
+
+python_api = open(file_name_for_python_api_woth_path, "w", encoding='UTF-8')
+python_api.writelines([start_classes_str])
+python_api.writelines(generated_api_lines)
+python_api.writelines([create_class_str])
+python_api.close()
