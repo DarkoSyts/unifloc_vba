@@ -50,13 +50,42 @@ start_classes_str = "import xlwings as xw\n" \
                 "addin_name_str = \"UniflocVBA_7.xlam\"\n" \
                 "class API():\n" \
                 "" + tab_str + "def __init__(self, addin_name_str):\n" \
-                               "" + 2 * tab_str + "book = xw.Book(addin_name_str)\n"
+                               "" + 2 * tab_str + "self.book = xw.Book(addin_name_str)\n"
 create_class_str = "UniflocVBA = API(addin_name_str)\n"
+
+api_const_string = "H_CORRELATION = 0 # 0 - BeggsBrill, 1 - Ansari and so on \n" \
+                   "PVT_CORRELATION = 0 # 0 -Standing, 1 -McCain, 2 - linear \n" \
+                   "PVT_DEFAULT = \"gamma_gas:0,900;gamma_oil:0,750;gamma_wat:1,000;rsb_m3m3:100,000;rp_m3m3:-1,000;pb_atma:-1,000;tres_C:90,000;bob_m3m3:-1,000;muob_cP:-1,000;PVTcorr:0;ksep_fr:0,000;pksep_atma:-1,000;tksep_C:-1,000; \" \n" \
+                   "ESP_DEFAULT = \"ESP_ID:1006.00000;HeadNom_m:2000.00000;ESPfreq_Hz:50.00000;ESP_U_V:1000.00000;MotorPowerNom_kW:30.00000;Tintake_C:85.00000;t_dis_C:25.00000;KsepGS_fr:0.00000;ESP_energy_fact_Whday:0.00000;ESP_cable_type:0;ESP_Hmes_m:0.00000;ESP_gas_degradation_type:0;c_calibr_head:0.00000;PKV_work_min:-1,00000;PKV_stop_min:-1,00000;\"\n" \
+                   "WELL_DEFAULT = \"hperf_m:2000,00000;hpump_m:1800,00000;udl_m:0,00000;d_cas_mm:150,00000;dtub_mm:72,00000;dchoke_mm:15,00000;roughness_m:0,00010;tbh_C:85,00000;twh_C:25,00000;\"\n" \
+                   "WELL_GL_DEFAULT = \"hperf_m:2500,00000;htub_m:2000,00000;udl_m:0,00000;d_cas_mm:125,00000;dtub_mm:62,00000;dchoke_mm:15,00000;roughness_m:0,00010;tbh_C:100,00000;twh_C:50,00000;GLV:1;H_glv_m:1500,000;d_glv_mm:5,000;p_glv_atma:50,000;\"\n" \
+                   "const_gg_ = 0.6 \n" \
+                   "const_gw_ = 1 \n" \
+                   "const_go_ = 0.86 \n" \
+                   "const_sigma_wat_gas_Nm = 0.01 \n" \
+                   "const_sigma_oil_Nm = 0.025 \n" \
+                   "const_mu_w = 0.36\n" \
+                   "const_mu_g = 0.0122 \n" \
+                   "const_mu_o = 0.7 \n" \
+                   "const_rsb_default = 100 \n" \
+                   "const_Bob_default = 1.2 \n" \
+                   "const_tres_default = 90 \n" \
+                   "const_Roughness_default = 0.0001 \n" \
+                   "Standing_based = 0 \n"
+
+
+
 
 API_func_str = ""
 
+def create_func_in_API(parameters_str, atributs_in_signature_str, func_name_str, func_from_book):
+    start_string_in_func = tab_str + "def calc_" + func_name_str + "(self, " + atributs_in_signature_str + "):\n"
+    middle_string_in_func = func_from_book
+    end_string_in_func = 2 * tab_str + "return " + "self." + func_name_str + "(" + parameters_str + ")\n"
+    return start_string_in_func + middle_string_in_func + end_string_in_func
+
 def append_func_in_API_func_str(filled_str, VBA_func_name):
-    str_to_append = 2 * tab_str +"self." + VBA_func_name + " = book.macro(\"" + VBA_func_name + "\")\n"
+    str_to_append = 2 * tab_str +"self." + VBA_func_name + " = self.book.macro(\"" + VBA_func_name + "\")\n"
     new_str = filled_str + str_to_append
     return new_str
 
@@ -177,10 +206,13 @@ class VBA_Func_Header:
         string_contain_end_of_parametrs = False
         string_number = 4
         sting_with_parametrs_and_delimetr = ""
-
+        string_with_parameters_for_api = ""
         """
         list of pattern, that will be deleted in sting
         """
+        not_nedeed_in_api = [self.func_name, "ByVal",  "Optional", "Double", "Integer", "Boolean",
+                                "String", "Public", " As ", "Function", " _ ", " ",  "\n", "\' ", "(_"]
+
         not_nedeed_in_string = [self.func_name, "ByVal","-1", "const", "Optional", "Double", "Integer", "Boolean",
                                 "String", "Public", " As ", "Function", " _ ", " ", "=",  "\n", "\' ", "(_",
                                 "PVT_DEFAULT", "H_CORRELATION"]
@@ -194,6 +226,7 @@ class VBA_Func_Header:
                 if last_step == 1:
                     last_step += 1
                 current_addition = result_lines[string_number]
+                string_with_parameters_for_api += current_addition
                 all_const_deleted = False
                 while not all_const_deleted:
                     this_const_deleted = False
@@ -212,8 +245,15 @@ class VBA_Func_Header:
 
                                 position_next +=1
 
-
-
+                for i in not_nedeed_in_api:
+                    string_with_parameters_for_api = string_with_parameters_for_api.replace(i, "")
+                string_with_parameters_for_api = string_with_parameters_for_api.replace(",_", ",")
+                string_with_parameters_for_api = string_with_parameters_for_api.replace("_)", "")
+                string_with_parameters_for_api = string_with_parameters_for_api.replace(")", "")
+                string_with_parameters_for_api = string_with_parameters_for_api.replace("(", "")
+                string_with_parameters_for_api = string_with_parameters_for_api.replace("hydr_corrH_CORRELATION=0",
+                                                                                        "hydr_corr=H_CORRELATION")
+                #string_with_parameters_for_api = string_with_parameters_for_api.lower()
                 for i in not_nedeed_in_string:
 
                     current_addition = current_addition.replace(i, "")
@@ -392,10 +432,12 @@ class VBA_Func_Header:
         """
         create python api file 
         """
-        py_result = start_classes_str + self.API_func_str + create_class_str
+        finished_API_func_str = create_func_in_API(sting_with_parametrs_and_delimetr, string_with_parameters_for_api,
+                                                   self.func_name, self.API_func_str)
+        py_result = finished_API_func_str +"\n"
         file_name_for_python_api = path_listings_out + '/' + self.file_name_for_python_api
         f4_api = open(file_name_for_python_api, "a", encoding='UTF-8')
-        f4_api.writelines([self.API_func_str])
+        f4_api.writelines([py_result])
         f4_api.close()
         """
         create file with one function in needed format
@@ -508,7 +550,7 @@ generated_api_lines = python_api.read()
 python_api.close()
 
 python_api = open(file_name_for_python_api_woth_path, "w", encoding='UTF-8')
-python_api.writelines([start_classes_str])
+python_api.writelines([api_const_string + start_classes_str])
 python_api.writelines(generated_api_lines)
 python_api.writelines([create_class_str])
 python_api.close()
