@@ -2079,4 +2079,6 @@ class API():
         return self.crv_intersection(x1_points,y1_points,x2_points,y2_points)
 
 UniflocVBA = API(addin_name_str)
-print(UniflocVBA.calc_PVT_bo_m3m3(30,30))
+
+print(sum(UniflocVBA.calc_MF_dp_choke_atm(300,0,8)[0]))
+print(UniflocVBA.calc_MF_calibr_pipe_m3day(100, 20, 100, 100, 20))
