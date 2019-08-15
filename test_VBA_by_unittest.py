@@ -12,6 +12,11 @@ d_choke_mm = 10
 p_in_atma = 60
 p_out_atma = 30
 free_gas_d = 0.3
+ESP_string = UniflocVBA.calc_ESP_encode_string(esp_ID = 747)
+PVT_string = UniflocVBA.calc_PVT_encode_string()
+Well_string = UniflocVBA.calc_well_encode_string()
+qgas_sm3day = 100 * 100
+
 class TestPVT(unittest.TestCase):
     def test_PVT_bg_m3m3(self):
         result = UniflocVBA.calc_PVT_bg_m3m3(p_atm, t_c)
@@ -123,8 +128,8 @@ class TestMF(unittest.TestCase):
         self.assertAlmostEqual(result, 44.34814453125, delta=delta_1_in_test)
 
     def test_MF_rp_gas_fraction_m3m3(self):
-        result = UniflocVBA.calc_MF_rp_gas_fraction_m3m3(q_liq_m3day,  p_atm, t_c, fw_perc)
-        self.assertAlmostEqual(result, 0.03498879664846513, delta=delta_1_in_test)
+        result = UniflocVBA.calc_MF_rp_gas_fraction_m3m3(free_gas_d,  p_atm, t_c, fw_perc)
+        self.assertAlmostEqual(result, 49.346923828125, delta=delta_1_in_test)
 
     def test_MF_gasseparator_name(self):
         result = UniflocVBA.calc_MF_gasseparator_name(1)
@@ -166,7 +171,137 @@ class TestMF(unittest.TestCase):
         result = sum(UniflocVBA.calc_MF_calibr_choke_fr(q_liq_m3day, fw_perc, d_choke_mm, p_in_atma, p_out_atma)[0])
         self.assertAlmostEqual(result, 110.4230555941965, delta=delta_1_in_test)
 
+class TestESP(unittest.TestCase):
+    def test_ESP_encode_string(self):
+        result = UniflocVBA.calc_ESP_encode_string()
+        self.assertAlmostEqual(result, 0.6132212223600052, delta=delta_1_in_test)
 
+    def test_ESP_calibr_calc(self):
+        result = UniflocVBA.calc_ESP_calibr_calc(q_liq_m3day, fw_perc, 30, 100, PVT_string, ESP_string)
+        self.assertAlmostEqual(result, 0.6132212223600052, delta=delta_1_in_test)
+
+    def test_ESP_decode_string(self):
+        result = UniflocVBA.calc_ESP_decode_string(ESP_string)
+        self.assertAlmostEqual(result, 0.6132212223600052, delta=delta_1_in_test)
+
+    def test_ESP_dp_atm(self):
+        result = sum(UniflocVBA.calc_ESP_dp_atm(q_liq_m3day, fw_perc, 30, pump_id=747))
+        self.assertAlmostEqual(result, 137.991989734772, delta=delta_1_in_test)
+
+    def test_ESP_eff_fr(self):
+        result = UniflocVBA.calc_ESP_eff_fr(150, pump_id=747) # TODO не работает с насосом по умолчанию
+        self.assertAlmostEqual(result, 0.5530630058389673, delta=delta_1_in_test)
+
+    def test_ESP_head_m(self):
+        result = UniflocVBA.calc_ESP_head_m(150, pump_id=747)
+        self.assertAlmostEqual(result, 7.39794452714204, delta=delta_1_in_test)
+
+    def test_ESP_id_by_rate(self):
+        result = UniflocVBA.calc_ESP_id_by_rate(100)
+        self.assertAlmostEqual(result, 737, delta=delta_1_in_test)
+
+    def test_ESP_max_rate_m3day(self):
+        result = UniflocVBA.calc_ESP_max_rate_m3day(pump_id=747)
+        self.assertAlmostEqual(result, 355.0, delta=delta_1_in_test)
+
+    def test_ESP_name(self):
+        result = UniflocVBA.calc_ESP_name()
+        self.assertAlmostEqual(result, 0.6132212223600052, delta=delta_1_in_test)
+
+    def test_ESP_optRate_m3day(self):
+        result = UniflocVBA.calc_ESP_optRate_m3day(pump_id=747)
+        self.assertAlmostEqual(result, 159.0, delta=delta_1_in_test)
+
+    def test_ESP_p_atm(self):
+        result = sum(UniflocVBA.calc_ESP_p_atma(q_liq_m3day, 20, 300, pump_id=747))
+        self.assertAlmostEqual(result, 584.5820558406429, delta=delta_1_in_test)
+
+    def test_ESP_power_W(self):
+        result = UniflocVBA.calc_ESP_power_W(q_liq_m3day, pump_id=747)
+        self.assertAlmostEqual(result, 197.11598932884485, delta=delta_1_in_test)
+
+    def test_ESP_system_calc(self):
+        result = UniflocVBA.calc_ESP_system_calc(q_liq_m3day, fw_perc, 30,PVT_string, ESP_string)
+        self.assertAlmostEqual(result, 0.6132212223600052, delta=delta_1_in_test)
+
+class TestReservoir(unittest.TestCase):
+    def test_IPR_pi_sm3dayatm(self):
+        result = UniflocVBA.calc_IPR_pi_sm3dayatm(30, 100,250)
+        self.assertAlmostEqual(result, 0.2405968502486054, delta=delta_1_in_test)
+
+    def test_IPR_pwf_atma(self):
+        result = UniflocVBA.calc_IPR_pwf_atma(1, 250, 100, 20, 10)
+        self.assertAlmostEqual(result, 150.0, delta=delta_1_in_test)
+
+    def test_IPR_qliq_sm3day(self):
+        result = UniflocVBA.calc_IPR_qliq_sm3day(1, 250, 100)
+        self.assertAlmostEqual(result, 124.68991164681252, delta=delta_1_in_test)
+
+class TestWell(unittest.TestCase):
+    def test_well_pintake_pwf_atma(self):
+        result = UniflocVBA.calc_well_pintake_pwf_atma(q_liq_m3day, fw_perc, 100, Well_string, PVT_string )
+        self.assertAlmostEqual(result, 84.22921891416985, delta=delta_1_in_test)
+
+    def test_well_plin_pwf_atma(self):
+        result = sum(UniflocVBA.calc_well_plin_pwf_atma(q_liq_m3day, fw_perc, 200, str_ESP= ESP_string)[0][0:-1])
+        self.assertAlmostEqual(result, 2331.1486659864518, delta=delta_1_in_test)
+
+    def test_well_pwf_Hdyn_atma(self):
+        result = UniflocVBA.calc_well_pwf_Hdyn_atma(q_liq_m3day, fw_perc, 20, 700)[0][3]
+        self.assertAlmostEqual(result, 19.6347298261911, delta=delta_1_in_test)
+
+    def test_well_pwf_plin_atma(self):
+        result = sum(UniflocVBA.calc_well_pwf_plin_atma(q_liq_m3day, fw_perc, 20 )[0][0:16])
+        self.assertAlmostEqual(result, 539.7268628016981, delta=delta_1_in_test)
+
+    def test_well_encode_string(self):
+        result = UniflocVBA.calc_well_encode_string()
+        self.assertAlmostEqual(result, 124.68991164681252, delta=delta_1_in_test)
+
+    def test_well_decode_string(self):
+        result = UniflocVBA.calc_well_decode_string(Well_string)
+        self.assertAlmostEqual(result, 124.68991164681252, delta=delta_1_in_test)
+
+class TestGLV(unittest.TestCase):  # TODO доделать последние функции для газлифта, некоторые вообще не считают
+    def test_GLV_d_choke_mm(self):
+        result = UniflocVBA.calc_GLV_d_choke_mm(qgas_sm3day, 100, 80)
+        self.assertAlmostEqual(result, 2.9374985373041227, delta=delta_1_in_test)
+
+    """def test_GLV_IPO_p_atma(self): # не считает
+        result = UniflocVBA.calc_GLV_IPO_p_atma(100, 3, 110, qgas_sm3day, 20)
+        self.assertAlmostEqual(result, 2.9374985373041227, delta=delta_1_in_test)
+
+    def test_GLV_d_choke_mm(self):
+        result = UniflocVBA.calc_GLV_d_choke_mm(qgas_sm3day, 100, 80)
+        self.assertAlmostEqual(result, 2.9374985373041227, delta=delta_1_in_test)
+
+    def test_GLV_d_choke_mm(self):
+        result = UniflocVBA.calc_GLV_d_choke_mm(qgas_sm3day, 100, 80)
+        self.assertAlmostEqual(result, 2.9374985373041227, delta=delta_1_in_test)
+
+    def test_GLV_d_choke_mm(self):
+        result = UniflocVBA.calc_GLV_d_choke_mm(qgas_sm3day, 100, 80)
+        self.assertAlmostEqual(result, 2.9374985373041227, delta=delta_1_in_test)
+
+    def test_GLV_d_choke_mm(self):
+        result = UniflocVBA.calc_GLV_d_choke_mm(qgas_sm3day, 100, 80)
+        self.assertAlmostEqual(result, 2.9374985373041227, delta=delta_1_in_test)
+
+    def test_GLV_d_choke_mm(self):
+        result = UniflocVBA.calc_GLV_d_choke_mm(qgas_sm3day, 100, 80)
+        self.assertAlmostEqual(result, 2.9374985373041227, delta=delta_1_in_test)
+
+    def test_GLV_d_choke_mm(self):
+        result = UniflocVBA.calc_GLV_d_choke_mm(qgas_sm3day, 100, 80)
+        self.assertAlmostEqual(result, 2.9374985373041227, delta=delta_1_in_test)
+
+    def test_GLV_d_choke_mm(self):
+        result = UniflocVBA.calc_GLV_d_choke_mm(qgas_sm3day, 100, 80)
+        self.assertAlmostEqual(result, 2.9374985373041227, delta=delta_1_in_test)
+
+    def test_GLV_d_choke_mm(self):
+        result = UniflocVBA.calc_GLV_d_choke_mm(qgas_sm3day, 100, 80)
+        self.assertAlmostEqual(result, 2.9374985373041227, delta=delta_1_in_test)"""
 
 
 
