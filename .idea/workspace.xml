@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="b3dcb58b-4a34-49e0-be72-204b8b23e2b7" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/well_run_by_API.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/well_run_by_API.py" beforeDir="false" afterPath="$PROJECT_DIR$/well_run_by_API.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -205,19 +205,13 @@
           <line>202</line>
           <option name="timeStamp" value="2" />
         </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/well_run_by_API.py</url>
+          <line>140</line>
+          <option name="timeStamp" value="3" />
+        </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
-    <watches-manager>
-      <configuration name="PythonConfigurationType">
-        <watch expression="self.lines" />
-        <watch expression="result_lines" />
-        <watch expression="sting_with_parametrs_and_delimetr" />
-        <watch expression="i" />
-        <watch expression="current_string" />
-        <watch expression="number_of_writed_parametrs_in_description" />
-        <watch expression="number_of_parametrs" />
-      </configuration>
-    </watches-manager>
   </component>
   <component name="debuggerHistoryManager">
     <expressions id="evaluateExpression">
