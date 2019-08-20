@@ -78,18 +78,25 @@ api_const_string = "H_CORRELATION = 0 # 0 - BeggsBrill, 1 - Ansari and so on \n"
 
 API_func_str = ""
 
-def create_func_in_API(parameters_str, atributs_in_signature_str, func_name_str, func_from_book, func_description):
+def create_func_in_API(parameters_str, atributs_in_signature_str, func_name_str, func_from_book, func_description, description_string_lines):
     start_string_in_func = tab_str + "def calc_" + func_name_str + "(self, " + atributs_in_signature_str + "):\n"
     func_description = func_description.replace("\"","   ")
     func_description = func_description.replace(", _", "")
     func_description = func_description.replace("\'", "")
     func_description = func_description.replace("ArgumentDescriptions:=Array( ", "")
-    func_description = "        \"\"\"" + func_description + "        \"\"\"\n"
+    func_description = "        " + func_description + "        \"\"\"\n"
     func_description = func_description.replace("\n", "\n\n")
     func_description = func_description.replace("\n\n\n\n", "")
+
+    description_string_lines = description_string_lines.replace(description_string, "")
+    description_string_lines = description_string_lines.replace(", _", "")
+    description_string_lines = "        \"\"\"" + description_string_lines + "        \n"
+    description_string_lines = description_string_lines.replace(" \"\n", "\n")
+    description_string_lines = description_string_lines.replace("\'", "")
+
     middle_string_in_func = func_from_book
     end_string_in_func = 2 * tab_str + "return " + "self." + func_name_str + "(" + parameters_str + ")\n"
-    return start_string_in_func + func_description + middle_string_in_func + end_string_in_func
+    return start_string_in_func + description_string_lines + func_description + middle_string_in_func + end_string_in_func
 
 def append_func_in_API_func_str(filled_str, VBA_func_name):
     str_to_append = 2 * tab_str +"self." + VBA_func_name + " = self.book.macro(\"" + VBA_func_name + "\")\n"
@@ -441,7 +448,7 @@ class VBA_Func_Header:
         """
         finished_API_func_str = create_func_in_API(sting_with_parametrs_and_delimetr, string_with_parameters_for_api,
                                                    self.func_name, self.API_func_str,
-                                                   argument_descriptions_string_with_stuff)
+                                                   argument_descriptions_string_with_stuff, description_string_lines)
         py_result = finished_API_func_str +"\n"
         file_name_for_python_api = path_listings_out + '/' + self.file_name_for_python_api
         f4_api = open(file_name_for_python_api, "a", encoding='UTF-8')
