@@ -1,9 +1,15 @@
+"""
+Модуль для массового расчета скважин, оснащенных УЭЦН
+
+Кобзарь О.С Хабибуллин Р.А. 21.08.2019
+"""
+
 import description_generated.python_api as python_api
-from scipy.optimize import fsolve
+from scipy.optimize import minimize
 
 UniflocVBA = python_api.API("UniflocVBA_7.xlam")
 
-gamma_oil = 0.945
+"""gamma_oil = 0.945
 gamma_gas = 0.9
 gamma_wat = 1.011
 rsb_m3m3 = 29.25
@@ -62,7 +68,7 @@ for i in range(len(result[0])):
     print(str(result[1][i]) + " -  " + str(result[0][i]))
 
 c_calibr_head_d = 0.6
-
+"""
 class all_ESP_data():
     def __init__(self):
         self.esp_id = UniflocVBA.calc_ESP_id_by_rate(320)
@@ -105,38 +111,102 @@ class all_ESP_data():
 
         self.qliq_m3day = 122.2
         self.watercut_perc = 25.6
+        self.p_buf_data_atm = 27
+        self.h_perf_m = 831
+        self.h_pump_m = 830
+
+        self.c_calibr_head_d = None
+        self.result = None
 
 
 
-this_state = all_ESP_data()
 
 
-def calc_well_plin_pwf_atma_for_fsolve(c_calibr_head_d):
-    c_calibr_head_d = float(c_calibr_head_d)
-    Wellstr = UniflocVBA.calc_well_encode_string(831, 830, 0, this_state.dcas_mm, this_state.d_tube_mm,
-                                                 this_state.d_choke_mm, tbh_C=this_state.tres_c)
-    ESPstr = UniflocVBA.calc_ESP_encode_string(this_state.esp_id, this_state.ESP_head_nom, this_state.ESP_freq,
-                                               this_state.u_motor_data_v, this_state.power_motor_nom_kwt,
-                                               this_state.tsep_c, ESP_Hmes_m=this_state.h_tube_m,
-                                               c_calibr_power=1,
-                                               c_calibr_rate=1)
-    result = UniflocVBA.calc_well_plin_pwf_atma(this_state.qliq_m3day, this_state.watercut_perc, this_state.p_wf_atm,
-                                                this_state.p_cas_data_atm, Wellstr,
-                                                PVTstr, ESPstr, c_calibr_head_d=c_calibr_head_d)
 
-    p_buf_calc_atm = result[0][2]
-    result_for_folve = (p_buf_calc_atm - p_buf_data_atm) ** 2
-    print(p_buf_calc_atm)
-    print(result_for_folve)
-    return result_for_folve
-
-#fsolve(calc_well_plin_pwf_atma_for_fsolve, 0.5, xtol = 0.5)
-from scipy.optimize import minimize
-print("     \n")
-result = minimize(calc_well_plin_pwf_atma_for_fsolve, [0.5], bounds = [[0,1]])
+"""result = minimize(calc_well_plin_pwf_atma_for_fsolve, [0.5], bounds = [[0,1]])
 print(result)
-print(result.x[0])
-print(str(c_calibr_head_d) + " c_calibr_head_d")
+print(result.x[0])"""
+
+def mass_calculation(well_state):
+    this_state = well_state
+
+    def calc_well_plin_pwf_atma_for_fsolve(c_calibr_head_d):
+        c_calibr_head_d = c_calibr_head_d[0]
+        PVTstr = UniflocVBA.calc_PVT_encode_string(this_state.gamma_gas, this_state.gamma_oil,
+                                                   this_state.gamma_wat, this_state.rsb_m3m3, this_state.rp_m3m3,
+                                                   this_state.pb_atm, this_state.tres_c,
+                                                   this_state.bob_m3m3, this_state.muob_cp,
+                                                   ksep_fr=this_state.ksep_d, pksep_atma=this_state.psep_atm,
+                                                   tksep_C=this_state.tsep_c)
+        Wellstr = UniflocVBA.calc_well_encode_string(this_state.h_perf_m, this_state.h_pump_m, 0, this_state.dcas_mm,
+                                                     this_state.d_tube_mm,
+                                                     this_state.d_choke_mm, tbh_C=this_state.tres_c)
+        ESPstr = UniflocVBA.calc_ESP_encode_string(this_state.esp_id, this_state.ESP_head_nom, this_state.ESP_freq,
+                                                   this_state.u_motor_data_v, this_state.power_motor_nom_kwt,
+                                                   this_state.tsep_c, ESP_Hmes_m=this_state.h_tube_m,
+                                                   c_calibr_power=1,
+                                                   c_calibr_rate=1)
+        result = UniflocVBA.calc_well_plin_pwf_atma(this_state.qliq_m3day, this_state.watercut_perc,
+                                                    this_state.p_wf_atm,
+                                                    this_state.p_cas_data_atm, Wellstr,
+                                                    PVTstr, ESPstr, c_calibr_head_d=c_calibr_head_d)
+        this_state.c_calibr_head_d = c_calibr_head_d
+        this_state.result = result
+        p_buf_calc_atm = result[0][2]
+        result_for_folve = (p_buf_calc_atm - this_state.p_buf_data_atm) ** 2
+        print(p_buf_calc_atm)
+        print(result_for_folve)
+        return result_for_folve
+    result = minimize(calc_well_plin_pwf_atma_for_fsolve, [0.5], bounds=[[0, 10]])
+    print(result)
+    print(result.x[0])
+    true_result = this_state.result#calc_well_plin_pwf_atma_for_fsolve([this_state.c_calibr_head_d])
+    for i in range(len(true_result[0])):
+        print(str(true_result[1][i]) + " -  " + str(true_result[0][i]))
+
+this_state2 = all_ESP_data()
+mass_calculation(this_state2)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+"""print(str(c_calibr_head_d) + " c_calibr_head_d")
 
 
 result_fsolve = UniflocVBA.calc_well_plin_pwf_atma(qliq_m3day, watercut_perc, p_wf_atm, p_cas_data_atm, Wellstr,
@@ -144,7 +214,7 @@ result_fsolve = UniflocVBA.calc_well_plin_pwf_atma(qliq_m3day, watercut_perc, p_
 print(str(p_wellhead_data_atm) +" p_wellhead_data_atm ")
 for i in range(len(result_fsolve[0])):
     print(str(result_fsolve[1][i]) + " -  " + str(result_fsolve[0][i]))
-
+"""
 '''import pandas as pd
 
 class well():
