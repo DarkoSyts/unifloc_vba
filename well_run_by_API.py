@@ -6,7 +6,7 @@
 
 import description_generated.python_api as python_api
 from scipy.optimize import minimize
-
+import pandas as pd
 UniflocVBA = python_api.API("UniflocVBA_7.xlam")
 
 """gamma_oil = 0.945
@@ -79,7 +79,7 @@ class all_ESP_data():
         self.tres_c = 16
         self.pb_atm = 40
         self.bob_m3m3 = 1.045
-        self.muob_cp = 400
+        self.muob_cp = 500
         self.ksep_d = 0.7
         self.psep_atm = 30
         self.tsep_c = 30
@@ -123,6 +123,7 @@ class all_ESP_data():
 
 
 
+
 """result = minimize(calc_well_plin_pwf_atma_for_fsolve, [0.5], bounds = [[0,1]])
 print(result)
 print(result.x[0])"""
@@ -143,29 +144,85 @@ def mass_calculation(well_state):
                                                      this_state.d_choke_mm, tbh_C=this_state.tres_c)
         ESPstr = UniflocVBA.calc_ESP_encode_string(this_state.esp_id, this_state.ESP_head_nom, this_state.ESP_freq,
                                                    this_state.u_motor_data_v, this_state.power_motor_nom_kwt,
-                                                   this_state.tsep_c, ESP_Hmes_m=this_state.h_tube_m,
-                                                   c_calibr_power=1,
-                                                   c_calibr_rate=1)
+                                                   this_state.tsep_c, ESP_Hmes_m=this_state.h_tube_m )#,
+                                                   #c_calibr_power=3,
+                                                   #c_calibr_rate=1)
         result = UniflocVBA.calc_well_plin_pwf_atma(this_state.qliq_m3day, this_state.watercut_perc,
                                                     this_state.p_wf_atm,
                                                     this_state.p_cas_data_atm, Wellstr,
                                                     PVTstr, ESPstr, c_calibr_head_d=c_calibr_head_d)
-        this_state.c_calibr_head_d = c_calibr_head_d
         this_state.result = result
-        p_buf_calc_atm = result[0][2]
+
+        """p_buf_calc_atm = result[0][2]
         result_for_folve = (p_buf_calc_atm - this_state.p_buf_data_atm) ** 2
-        print(p_buf_calc_atm)
+        print(p_buf_calc_atm)"""
+
+        power_CS_calc_W = result[0][16]
+        result_for_folve = (power_CS_calc_W - this_state.active_power_cs_data_kwt) ** 2
+        print(power_CS_calc_W)
+
         print(result_for_folve)
         return result_for_folve
-    result = minimize(calc_well_plin_pwf_atma_for_fsolve, [0.5], bounds=[[0, 10]])
-    print(result)
-    print(result.x[0])
-    true_result = this_state.result#calc_well_plin_pwf_atma_for_fsolve([this_state.c_calibr_head_d])
-    for i in range(len(true_result[0])):
-        print(str(true_result[1][i]) + " -  " + str(true_result[0][i]))
+    result = minimize(calc_well_plin_pwf_atma_for_fsolve, [0.5], bounds=[[0, 3]])
 
-this_state2 = all_ESP_data()
-mass_calculation(this_state2)
+    #print(result)
+    #print(result.x[0])
+    true_result = this_state.result
+    return true_result
+    #for i in range(len(true_result[0])):
+    #    print(str(true_result[1][i]) + " -  " + str(true_result[0][i]))
+
+
+import time
+import pandas as pd
+import sys
+sys.path.append("../")
+import stuff_to_merge.plotly_workflow as pw
+import datetime
+start = datetime.datetime(2019,2,3)
+end = datetime.datetime(2019,2,6)
+prepared_data = pd.read_csv("stuff_to_merge/input_data.csv")
+prepared_data.index = pd.to_datetime(prepared_data["Unnamed: 0"])
+prepared_data = prepared_data[(prepared_data.index > start) & (prepared_data.index < end)]
+del prepared_data["Unnamed: 0"]
+
+result_list = []
+result_dataframe = {'d':[2]}
+result_dataframe = pd.DataFrame(result_dataframe)
+start_time = time.time()
+for i in range(prepared_data.shape[0]):
+#for i in range(1):
+    start_in_loop_time = time.time()
+    row_in_prepared_data = prepared_data.iloc[i]
+    this_state = all_ESP_data()
+    this_state.qliq_m3day = row_in_prepared_data[' Объемный дебит жидкости']
+    this_state.watercut_perc = row_in_prepared_data[' Процент обводненности']
+    this_state.rp_m3m3 = row_in_prepared_data['ГФ']
+    this_state.p_buf_data_atm = row_in_prepared_data['Рбуф']
+    this_state.p_intake_data_atm = row_in_prepared_data[' Давление на приеме насоса (пласт. жидкость)'] * 10
+    this_state.tsep_c = row_in_prepared_data[' Температура на приеме насоса (пласт. жидкость)']
+    this_state.tres_c = 16
+    this_state.psep_atm = row_in_prepared_data[' Давление на приеме насоса (пласт. жидкость)'] * 10
+    this_state.p_wf_atm = row_in_prepared_data[' Давление на приеме насоса (пласт. жидкость)'] * 10
+    this_state.active_power_cs_data_kwt = row_in_prepared_data[' Активная мощность'] * 1000
+    this_result = mass_calculation(this_state)
+    result_list.append(this_result)
+    end_in_loop_time = time.time()
+    print("Затрачено времени в итерации: " + str(i) + " - " + str(end_in_loop_time - start_in_loop_time))
+    new_dict = {}
+    for i in range(len(this_result[1])):
+        new_dict[this_result[1][i]] = [this_result[0][i]]
+        print(str(this_result[1][i]) + " -  " + str(this_result[0][i]))
+    new_dataframe = pd.DataFrame(new_dict)
+    result_dataframe = result_dataframe.append(new_dataframe, sort=False)
+
+
+end_time = time.time()
+
+print("Затрачено всего: " + str(end_time - start_time))
+result_dataframe.to_csv("stuff_to_merge/fourth_result_maybe.csv")
+#this_state2 = all_ESP_data()
+#mass_calculation(this_state2)
 
 
 
