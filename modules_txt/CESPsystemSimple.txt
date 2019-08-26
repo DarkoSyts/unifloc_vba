@@ -454,8 +454,16 @@ End Function
  Public Property Get c_calibr_power() As Double
     c_calibr_power = p_ESPpump.c_calibr_power
  End Property
+ 
+  Public Property Let c_calibr_power(val As Double) 'VFM
+    p_ESPpump.c_calibr_power = val
+ End Property
   
  Public Property Get c_calibr_rate() As Double
     c_calibr_rate = p_ESPpump.c_calibr_rate
+ End Property
+ 
+  Public Property Let c_calibr_rate(val As Double) 'VFM
+    p_ESPpump.c_calibr_rate = val
  End Property
  

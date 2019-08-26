@@ -20,6 +20,8 @@ Public Function well_plin_pwf_atma( _
         Optional ByVal hydr_corr As H_CORRELATION = 0, _
         Optional ByVal ksep_fr As Double = 0, _
         Optional ByVal c_calibr_head_d As Double = 0, _
+        Optional ByVal c_calibr_power_d As Double = 0, _
+        Optional ByVal c_calibr_rate_d As Double = 0, _
         Optional ByVal param_num As Integer = 1 _
                                     )
 ' исходные параметры
@@ -48,7 +50,9 @@ Public Function well_plin_pwf_atma( _
 ' ksep_fr - коэффициент сепарации.
 '           если задан - то используется вместо расчетного
 '           явное задание коэффициента серации ускоряет расчет
-' c_calibr_head_d - коэффициент деградации УЭЦН
+' c_calibr_head_d - коэффициент деградации напора УЭЦН
+' c_calibr_power_d - коэффициент деградации мощности УЭЦН
+' c_calibr_rate_d - коэффициент деградации расхода УЭЦН
 ' param_num - параметры для вывода в качестве результата
 '           на нулевой позиции выходного массива,
 '           полный набор результатов выводится в виде массива
@@ -59,7 +63,7 @@ Public Function well_plin_pwf_atma( _
     Dim well As CWellESP
     ' read all data to well object
     Set well = well_init_data(q_m3day, fw_perc, Pcas_atma, _
-                             str_well, str_PVT, str_ESP, hydr_corr, ksep_fr, c_calibr_head_d)
+                             str_well, str_PVT, str_ESP, hydr_corr, ksep_fr, c_calibr_head_d, c_calibr_power_d, c_calibr_rate_d) 'VFM
     ' call calc method
     Call well.calc_plin_pwf_atma(pwf_atma)
     ' return results
@@ -403,7 +407,9 @@ Private Function well_init_data(q_m3day, _
                       Optional str_ESP As String = 0, _
                       Optional hydr_corr As H_CORRELATION = 0, _
                       Optional ksep_fr As Double = 0, _
-                      Optional c_calibr_head_d As Double = 0) As CWellESP
+                      Optional c_calibr_head_d As Double = 1, _
+                      Optional c_calibr_power_d As Double = 1, _
+                      Optional c_calibr_rate_d As Double = 1) As CWellESP    'VFM
 ' исходные параметры
 ' q_m3day    - дебит жидкости, на поверхности
 ' fw_perc    - обводненность (объемная на поверхности)
@@ -429,7 +435,9 @@ Private Function well_init_data(q_m3day, _
 ' ksep_fr - коэффициент сепарации.
 '           если задан - то используется вместо расчетного
 '           явное задание коэффициента серации ускоряет расчет
-' c_calibr_head_d - коэффициент деградации УЭЦН
+' c_calibr_head_d - коэффициент деградации напора УЭЦН
+' c_calibr_power_d - коэффициент деградации мощности УЭЦН
+' c_calibr_rate_d - коэффициент деградации расхода УЭЦН
 ' на входе данные по конструкции скважины, PVT, ЭЦН
 ' берутся из строк с закодированными параметрами
 ' следует использовать функции Encode для передачи параметров
@@ -464,7 +472,9 @@ Private Function well_init_data(q_m3day, _
         ' link well with ESP object
         Set well.ESP = ESPsystem
         ' set correction factor for ESP
-        well.ESP.c_calibr_head = c_calibr_head_d
+        well.ESP.c_calibr_head = c_calibr_head_d    'VFM
+        well.ESP.c_calibr_power = c_calibr_power_d  'VFM
+        well.ESP.c_calibr_rate = c_calibr_rate_d    'VFM
         ' set separation coefficient if given
         If ksep_fr > 0 And ksep_fr <= 1 Then
             Call well.SetKseptotal_d(valueManual, ksep_fr, 0)

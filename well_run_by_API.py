@@ -24,14 +24,16 @@ class all_ESP_data():
         self.tres_c = 16
         self.pb_atm = 40
         self.bob_m3m3 = 1.045
-        self.muob_cp = 200
-        self.ksep_d = 0.7
+        self.muob_cp = 100
+
         self.psep_atm = 30
         self.tsep_c = 30
+
         self.d_choke_mm = 8
         self.dcas_mm = 160
         self.h_tube_m = 830
         self.d_tube_mm = 75
+
         self.Power_motor_nom_kWt = 140
         self.ESP_head_nom = 1500
         self.ESP_rate_nom = 320
@@ -43,7 +45,7 @@ class all_ESP_data():
         self.p_wellhead_data_atm = 22.70
         self.p_buf_data_atm = 27.0
         self.p_wf_atm = 29.93
-        self.p_cas_data_atm = 25.90
+        self.p_cas_data_atm = -1
 
         self.eff_motor_d = 0.89
         self.i_motor_nom_a = 6
@@ -59,8 +61,14 @@ class all_ESP_data():
         self.p_buf_data_atm = 27
         self.h_perf_m = 831
         self.h_pump_m = 830
+        self.udl_m = 0
 
+        self.ksep_d = 0.9
+        self.KsepGS_fr = 0.9
         self.c_calibr_head_d = None
+        self.c_calibr_rate_d = 1
+        self.c_calibr_power_d = 1
+        self.hydr_corr = 0
         self.result = None
 
 
@@ -68,40 +76,63 @@ def mass_calculation(well_state):
     this_state = well_state
 
     def calc_well_plin_pwf_atma_for_fsolve(c_calibr_head_d):
+        c_calibr_power_d = c_calibr_head_d[1]
         c_calibr_head_d = c_calibr_head_d[0]
+        c_calibr_rate_d = this_state.c_calibr_rate_d
+               #this_state.c_calibr_power_d
         PVTstr = UniflocVBA.calc_PVT_encode_string(this_state.gamma_gas, this_state.gamma_oil,
                                                    this_state.gamma_wat, this_state.rsb_m3m3, this_state.rp_m3m3,
                                                    this_state.pb_atm, this_state.tres_c,
                                                    this_state.bob_m3m3, this_state.muob_cp,
                                                    ksep_fr=this_state.ksep_d, pksep_atma=this_state.psep_atm,
                                                    tksep_C=this_state.tsep_c)
-        Wellstr = UniflocVBA.calc_well_encode_string(this_state.h_perf_m, this_state.h_pump_m, 0, this_state.dcas_mm,
+        Wellstr = UniflocVBA.calc_well_encode_string(this_state.h_perf_m,
+                                                     this_state.h_pump_m,
+                                                     this_state.udl_m,
+                                                     this_state.dcas_mm,
                                                      this_state.d_tube_mm,
-                                                     this_state.d_choke_mm, tbh_C=this_state.tres_c)
-        ESPstr = UniflocVBA.calc_ESP_encode_string(this_state.esp_id, this_state.ESP_head_nom, this_state.ESP_freq,
-                                                   this_state.u_motor_data_v, this_state.power_motor_nom_kwt,
-                                                   this_state.tsep_c, ESP_Hmes_m=this_state.h_tube_m )#,
-                                                   #c_calibr_power=3,
-                                                   #c_calibr_rate=1)
+                                                     this_state.d_choke_mm,
+                                                     tbh_C=this_state.tres_c)
+        ESPstr = UniflocVBA.calc_ESP_encode_string(this_state.esp_id,
+                                                   this_state.ESP_head_nom,
+                                                   this_state.ESP_freq,
+                                                   this_state.u_motor_data_v,
+                                                   this_state.power_motor_nom_kwt,
+                                                   this_state.tsep_c,
+                                                   KsepGS_fr=this_state.KsepGS_fr,
+                                                   ESP_Hmes_m=this_state.h_tube_m,
+                                                   c_calibr_head=c_calibr_head_d,
+                                                   c_calibr_rate=c_calibr_rate_d,
+                                                   c_calibr_power=c_calibr_power_d)
         result = UniflocVBA.calc_well_plin_pwf_atma(this_state.qliq_m3day, this_state.watercut_perc,
                                                     this_state.p_wf_atm,
                                                     this_state.p_cas_data_atm, Wellstr,
-                                                    PVTstr, ESPstr, c_calibr_head_d=c_calibr_head_d)
+                                                    PVTstr, ESPstr, this_state.hydr_corr,
+                                                    this_state.ksep_d, c_calibr_head_d, c_calibr_power_d,
+                                                    c_calibr_rate_d)
+
+
+
         this_state.result = result
 
         """p_buf_calc_atm = result[0][2]
         result_for_folve = (p_buf_calc_atm - this_state.p_buf_data_atm) ** 2
         print(p_buf_calc_atm)"""
 
+        #print(this_state.result)
+
+        p_buf_calc_atm = result[0][2]
         power_CS_calc_W = result[0][16]
-        result_for_folve = (power_CS_calc_W - this_state.active_power_cs_data_kwt) ** 2
-        print(power_CS_calc_W)
-
-        print(result_for_folve)
+        power_regulatization = 1 / 1000
+        result_for_folve = (p_buf_calc_atm - this_state.p_buf_data_atm) ** 2 + \
+                           (power_regulatization * (power_CS_calc_W - this_state.active_power_cs_data_kwt)) ** 2
+        print("power_CS_calc_W = " + str(power_CS_calc_W))
+        print("active_power_cs_data_kwt = " + str(this_state.active_power_cs_data_kwt))
+        print("result_for_folve = " + str(result_for_folve))
         return result_for_folve
-    result = minimize(calc_well_plin_pwf_atma_for_fsolve, [0.5], bounds=[[0, 3]], tol = 0.001)
+    result = minimize(calc_well_plin_pwf_atma_for_fsolve, [0.5, 0.5], bounds=[[0, 20], [0, 20]])
 
-    #print(result)
+    print(result)
     #print(result.x[0])
     true_result = this_state.result
     return true_result

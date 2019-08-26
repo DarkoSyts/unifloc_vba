@@ -1769,9 +1769,9 @@ class API():
 
         t_c - температура клапана в рабочих условиях, с    
 
-        glv_type - тип газлифтного клапана (сейчас только r1)    
-
         d_port_mm - диаметр порта клапана    
+
+        glv_type - тип газлифтного клапана (сейчас только r1)  d_port_mm - диаметр порта клапана    
 
         d_vkr1_mm - диаметр вкрутки 1, если есть    
 
@@ -1784,7 +1784,7 @@ class API():
         """
 
         self.GLV_IPO_p_open = self.book.macro("GLV_IPO_p_open")
-        return self.GLV_IPO_p_open(p_bellow_atma,p_out_atma,t_C,GLV_type,d_port_mm,d_vkr1_mm,d_vkr2_mm,d_vkr3_mm,d_vkr4_mm)
+        return self.GLV_IPO_p_open(p_bellow_atma,p_out_atma,t_C,d_port_mm,GLV_type,d_vkr1_mm,d_vkr2_mm,d_vkr3_mm,d_vkr4_mm)
 
     def calc_GLV_IPO_p_atma(self, p_bellow_atma,d_port_mm,p_calc_atma,q_gas_sm3day,t_C,calc_alog_flow=False,GLV_type=0,d_vkr1_mm=-1,d_vkr2_mm=-1,d_vkr3_mm=-1,d_vkr4_mm=-1):
         """"Функция расчета давления открытия газлифтного клапана R1
@@ -1825,9 +1825,9 @@ class API():
 
         t_c - температура клапана в рабочих условиях, с    
 
-        glv_type - тип газлифтного клапана (сейчас только r1)    
-
         d_port_mm - диаметр порта клапана    
+
+        glv_type - тип газлифтного клапана (сейчас только r1)  d_port_mm - диаметр порта клапана    
 
         d_vkr1_mm - диаметр вкрутки 1, если есть    
 
@@ -1840,7 +1840,7 @@ class API():
         """
 
         self.GLV_IPO_p_close = self.book.macro("GLV_IPO_p_close")
-        return self.GLV_IPO_p_close(p_bellow_atma,p_out_atma,t_C,GLV_type,d_port_mm,d_vkr1_mm,d_vkr2_mm,d_vkr3_mm,d_vkr4_mm)
+        return self.GLV_IPO_p_close(p_bellow_atma,p_out_atma,t_C,d_port_mm,GLV_type,d_vkr1_mm,d_vkr2_mm,d_vkr3_mm,d_vkr4_mm)
 
     def calc_PVT_encode_string(self, gamma_gas=const_gg_,gamma_oil=const_go_,gamma_wat=const_gw_,rsb_m3m3=const_rsb_default,rp_m3m3=-1,pb_atma=-1,tres_C=const_tres_default,bob_m3m3=-1,muob_cP=-1,PVTcorr=Standing_based,ksep_fr=0,pksep_atma=-1,tksep_C=-1,gas_only=False):
         """" Функция кодирования параметров PVT в строку,  для передачи PVT свойств в прикладных пользовательских функциях.
@@ -2026,7 +2026,7 @@ class API():
         self.wellGL_encode_string = self.book.macro("wellGL_encode_string")
         return self.wellGL_encode_string(hperf_m,htub_m,udl_m,d_cas_mm,dtub_mm,dchoke_mm,roughness_m,tbh_C,twh_C,HmesGLV_m,dGLV_mm,PsurfGLV_atma)
 
-    def calc_well_plin_pwf_atma(self, q_m3day,fw_perc,pwf_atma,Pcas_atma=-1,str_well=WELL_DEFAULT,str_PVT=PVT_DEFAULT,str_ESP=0,hydr_corr=H_CORRELATION,ksep_fr=0,c_calibr_head_d=0,param_num=1):
+    def calc_well_plin_pwf_atma(self, q_m3day,fw_perc,pwf_atma,Pcas_atma=-1,str_well=WELL_DEFAULT,str_PVT=PVT_DEFAULT,str_ESP=0,hydr_corr=H_CORRELATION,ksep_fr=0,c_calibr_head_d=0,c_calibr_power_d=0,c_calibr_rate_d=0,param_num=1):
         """" функция расчета линейного давления по забойному для скважины  расчет снизу-вверх, простой и быстрый расчет
         
                     q_m3day - дебит жидкости, на поверхности    
@@ -2047,14 +2047,18 @@ class API():
 
         ksep_fr - коэффициент сепарации.  если задан - то используется вместо расчетного  явное задание коэффициента серации ускоряет расчет    
 
-        c_calibr_head_d - коэффициент деградации уэцн    
+        c_calibr_head_d - коэффициент деградации напора уэцн    
+
+        c_calibr_power_d - коэффициент деградации мощности уэцн    
+
+        c_calibr_rate_d - коэффициент деградации расхода уэцн    
 
         param_num - параметры для вывода в качестве результата  на нулевой позиции выходного массива,    )  
 
         """
 
         self.well_plin_pwf_atma = self.book.macro("well_plin_pwf_atma")
-        return self.well_plin_pwf_atma(q_m3day,fw_perc,pwf_atma,Pcas_atma,str_well,str_PVT,str_ESP,hydr_corr,ksep_fr,c_calibr_head_d,param_num)
+        return self.well_plin_pwf_atma(q_m3day,fw_perc,pwf_atma,Pcas_atma,str_well,str_PVT,str_ESP,hydr_corr,ksep_fr,c_calibr_head_d,c_calibr_power_d,c_calibr_rate_d,param_num)
 
     def calc_well_pintake_pwf_atma(self, q_m3day,fw_perc,pwf_atma,str_well=WELL_DEFAULT,str_PVT=PVT_DEFAULT,hydr_corr=H_CORRELATION):
         """" функция расчета давления на приеме по забойному для скважины  расчет снизу-вверх, считает только участок ниже насоса

@@ -563,8 +563,8 @@ End Function
 Public Function GLV_IPO_p_open(ByVal p_bellow_atma As Double, _
                           ByVal p_out_atma As Double, _
                           ByVal t_C As Double, _
+                          Optional ByVal d_port_mm As Double, _
                  Optional ByVal GLV_type As Integer = 0, _
-                 Optional ByVal d_port_mm As Double, _
                  Optional ByVal d_vkr1_mm As Double = -1, _
                  Optional ByVal d_vkr2_mm As Double = -1, _
                  Optional ByVal d_vkr3_mm As Double = -1, _
@@ -628,8 +628,8 @@ End Function
 Public Function GLV_IPO_p_close(ByVal p_bellow_atma As Double, _
                               ByVal p_out_atma As Double, _
                               ByVal t_C As Double, _
+                              Optional ByVal d_port_mm As Double, _
                  Optional ByVal GLV_type As Integer = 0, _
-                 Optional ByVal d_port_mm As Double, _
                  Optional ByVal d_vkr1_mm As Double = -1, _
                  Optional ByVal d_vkr2_mm As Double = -1, _
                  Optional ByVal d_vkr3_mm As Double = -1, _
