@@ -344,7 +344,7 @@ Public Function calc_ESPsys(p_atma As Double, _
         p_ESPpump.c_calibr_power = 1 - p_power_motor_fact_W / power_CS_teor_calc_W
     End If
     '10. внесем в мощность поправку на деградацию по мощности
-    power_CS_calc_W = power_CS_teor_calc_W * (1 - c_calibr_power)
+    power_CS_calc_W = power_CS_teor_calc_W '* c_calibr_power     'VFM
     ' 11 рассчитаем загрузку двигателя, для этого получим номинальную мощность на данной частоте
     Dim PowNom_corr_W As Double
     PowNom_corr_W = power_motor_nom_W * freq_Hz / freq_nom_Hz   ' потом надо проверить что именно так считается номинальная мощность

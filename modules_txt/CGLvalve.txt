@@ -179,7 +179,7 @@ Public Function calc_p_out_atma(p_intake_atma As Double, q_gas_scm3day As Double
         If p_in_atma < p_open_atma + 2 Then
             pdif = p_open_atma + 2 - p_in_atma
             If pdif < 0 Then pdif = 0
-            calc_q_gas_sm3day = calc_q_gas_sm3day * (pdif) / 2
+            'calc_q_gas_sm3day = calc_q_gas_sm3day * (pdif) / 2  'VFM
         End If
     End If
     

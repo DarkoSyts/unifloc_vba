@@ -463,7 +463,7 @@ Private Function well_init_data(q_m3day, _
     ' set hydraulic correlation
     well.HFlowCorrelation = hydr_corr
     ' set temperature model with temperature gradient
-    well.TempCorrelation = GeoGradTemp
+    well.TempCorrelation = 2    'VFM GeoGradTemp
     ' read ESP object from encoded string
     If Len(str_ESP) < 3 Then
         Set well.ESP = Nothing
@@ -495,7 +495,7 @@ Private Function well_out_arr(well As CWellESP, Optional FirsrCol As Integer = 0
 ' первый параметр настраиваемый
     Dim ar1, ar2
     Dim res As New Dictionary
-    Const arr_len = 25
+    Const arr_len = 50  'VFM
 On Error GoTo err1:
     ReDim ar1(arr_len)
     ReDim ar2(arr_len)
@@ -520,12 +520,43 @@ On Error GoTo err1:
             res.Add "ESP.power_CS_calc_W", .ESP.power_CS_calc_W                'i=8
             res.Add "ESP.freq_Hz", .ESP.freq_Hz                                'i=9
             res.Add "ESP.I_A", .ESP.I_A                                        'i=10
+            res.Add "ESP.U_V", .ESP.U_V  'VFM
             res.Add "ESP.load_fr", .ESP.load_fr                                'i=11
             res.Add "ESP.ESPpump.EffiencyESP_d", .ESP.ESPpump.EffiencyESP_d    'i=12
             res.Add "ESP.KsepTotal_fr", .ESP.KsepTotal_fr                      'i=13
             res.Add "ESP.KsepNat_fr", .ESP.KsepNat_fr                          'i=14
             res.Add "ESP.KSepGasSep_fr", .ESP.KSepGasSep_fr                    'i=15
             res.Add "ESP.c_calibr_head", .ESP.c_calibr_head                            'i=21
+            res.Add "ESP.c_calibr_power", .ESP.c_calibr_power  'VFM
+            res.Add "ESP.c_calibr_rate", .ESP.c_calibr_rate  'VFM
+            
+            
+            'res.Add "ESP.power_motor_fact_W", .ESP.power_motor_fact_W  'VFM empty
+            res.Add "ESP.power_motor_nom_W", .ESP.power_motor_nom_W  'VFM
+            res.Add "ESP.cable_dU_V", .ESP.cable_dU_V  'VFM
+             
+            
+            res.Add "ESP.dPower_GasSep_W", .ESP.dPower_GasSep_W  'VFM
+            res.Add "ESP.dPower_protector_W", .ESP.dPower_protector_W  'VFM
+            res.Add "ESP.cable_dPower_W", .ESP.cable_dPower_W  'VFM
+            res.Add "ESP.dPower_transform_W", .ESP.dPower_transform_W  'VFM
+            res.Add "ESP.dPower_CS_W", .ESP.dPower_CS_W  'VFM
+            
+            
+            res.Add "ESP.ESPpump.Powerfluid_Wt", .ESP.ESPpump.Powerfluid_Wt  'VFM
+            res.Add "ESP.ESPpump.PowerESP_Wt", .ESP.ESPpump.PowerESP_Wt  'VFM
+            res.Add "ESP.power_shaft_W", .ESP.power_shaft_W  'VFM
+            res.Add "ESP.power_motor_W", .ESP.power_motor_W  'VFM
+            res.Add "ESP.cable_power_W", .ESP.cable_power_W  'VFM
+            res.Add "ESP.power_CS_teor_calc_W", .ESP.power_CS_teor_calc_W  'VFM
+            
+            
+            res.Add "ESP.QmixBeforePump_m3day", .ESP.QmixBeforePump_m3day  'VFM empty
+            res.Add "ESP.GasFraction_BeforePump_d", .ESP.GasFraction_BeforePump_d  'VFM empty
+            res.Add "ESP.GasFraction_InGasSep_d", .ESP.GasFraction_InGasSep_d  'VFM
+            res.Add "ESP.GasFraction_PumpIntake_d", .ESP.GasFraction_PumpIntake_d  'VFM
+            res.Add "ESP.GasFraction_PumpOutlet_d", .ESP.GasFraction_PumpOutlet_d  'VFM
+            
         End If
         For i = 1 To res.Count
             ar1(i) = res.Items()(i - 1): ar2(i) = res.Keys()(i - 1)
