@@ -477,7 +477,8 @@ Private Function well_init_data(q_m3day, _
         well.ESP.c_calibr_rate = c_calibr_rate_d    'VFM
         ' set separation coefficient if given
         If ksep_fr > 0 And ksep_fr <= 1 Then
-            Call well.SetKseptotal_d(valueManual, ksep_fr, 0)
+            Call well.SetKseptotal_d(byCorrealation, ksep_fr, ksep_fr) 'VFM
+            'Call well.SetKseptotal_d(valueManual, ksep_fr, 0) 'VFM
         Else
             Call well.SetKseptotal_d(byCorrealation, ksep_fr)
         End If

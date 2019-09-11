@@ -63,8 +63,8 @@ class all_ESP_data():
         self.h_pump_m = 830
         self.udl_m = 0
 
-        self.ksep_d = 0.9
-        self.KsepGS_fr = 0.9
+        self.ksep_d = 0.7
+        self.KsepGS_fr = 0.7
         self.c_calibr_head_d = None
         self.c_calibr_rate_d = 1
         self.c_calibr_power_d = 1
