@@ -314,6 +314,7 @@ Public Function calc_ESPsys(p_atma As Double, _
 ' calc_temperature - флаг режима расчета перепада температуры в Ё÷Ќ
     
     ' подготовим режима расчета температуры дл€ Ё÷Ќ
+    calc_temperature = True 'VFM костыль
     If calc_temperature Then
         t_dis_C = -1
     ElseIf t_dis_C < 0 Then

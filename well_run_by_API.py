@@ -92,7 +92,7 @@ def mass_calculation(well_state, debug_print = False):
                                                      this_state.dcas_mm,
                                                      this_state.d_tube_mm,
                                                      this_state.d_choke_mm,
-                                                     tbh_C=this_state.tres_c)
+                                                     tbh_C=this_state.tsep_c)
         ESPstr = UniflocVBA.calc_ESP_encode_string(this_state.esp_id,
                                                    this_state.ESP_head_nom,
                                                    this_state.ESP_freq,

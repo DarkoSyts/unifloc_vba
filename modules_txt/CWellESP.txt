@@ -401,7 +401,7 @@ Public Sub InitWellTemperature(Optional ByVal tbh_C As Double = -1, _
 On Error GoTo err1:
     simpleNumbers = IsNumeric(hmes_tamb_arr_m_)
     ambRange = IsObject(hmes_tamb_arr_m_) And IsObject(tamb_arr_C_)
-    newTempValues = ((tbh_C > 20) And (twh_C > 0)) Or ambRange
+    newTempValues = ((tbh_C > 15) And (twh_C > 0)) Or ambRange 'VFM
     
     If newTempValues Then
         If simpleNumbers Then

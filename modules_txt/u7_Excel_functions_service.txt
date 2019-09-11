@@ -489,16 +489,16 @@ On Error GoTo er2:
     key = "ESPfreq_Hz": ESPfreq_Hz = Cdbl_(dict.item(key))
     key = "ESP_U_V": ESP_U_V = Cdbl_(dict.item(key))
     key = "MotorPowerNom_kW": MotorPowerNom_kW = Cdbl_(dict.item(key))
-    key = "Tintake_C": tintake_C = Cdbl_(dict.item(key))
+    key = "t_intake_C": tintake_C = Cdbl_(dict.item(key))  'VFM было Tintake_C
     key = "t_dis_C": t_dis_C = Cdbl_(dict.item(key))
     key = "KsepGS_fr": KsepGS_fr = Cdbl_(dict.item(key))
     key = "ESP_energy_fact_Whday": ESP_energy_fact_Whday = Cdbl_(dict.item(key))
     key = "ESP_cable_type": ESP_cable_type = Cdbl_(dict.item(key))
     key = "ESP_Hmes_m": ESP_Hmes_m = Cdbl_(dict.item(key))
     key = "ESP_gas_degradation_type": ESP_gas_degradation_type = Cdbl_(dict.item(key))
-    key = "c_calibr_head": c_calibr_head = Cdbl_(dict.item(key))
-    key = "c_calibr_rate": c_calibr_head = Cdbl_(dict.item(key))
-    key = "c_calibr_power": c_calibr_head = Cdbl_(dict.item(key))
+    key = "c_calibr_head": c_calibr_head = Cdbl_(dict.item(key))  'VFM
+    key = "c_calibr_rate": c_calibr_rate = Cdbl_(dict.item(key))  'VFM
+    key = "c_calibr_power": c_calibr_power = Cdbl_(dict.item(key)) 'VFM
     key = "PKV_work_min": PKV_work_min = Cdbl_(dict.item(key))
     key = "PKV_stop_min": PKV_stop_min = Cdbl_(dict.item(key))
 ' при создании объекта все должно пройти идеально
