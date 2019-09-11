@@ -85,6 +85,7 @@ Option Explicit
 ' Private c_MuoT_curve As New CInterpolation         ' кривая вязкости нефти от давления при пластовой температуре
 ' Private c_MugTres_curve As New CInterpolation      ' кривая вязкости газа от давления при пластовой температуре
 ' Private c_MugT_curve As New CInterpolation         ' кривая вязкости газа от давления при пластовой температуре
+Private p_watercut_rc_perc As Double 'VFM
  Public gas_only As Boolean
  Public Property Get ZNLF() As Boolean
     ZNLF = p_ZNLF
@@ -984,9 +985,11 @@ On Error GoTo err1:
     p_q_liq_rc_m3day = p_q_wat_rc_m3day + p_q_oil_rc_m3day
     If (p_q_wat_rc_m3day + p_q_oil_rc_m3day + p_q_gas_rc_m3day) > 0 Then
         p_gas_fraction_d = p_q_gas_rc_m3day / (p_q_wat_rc_m3day + p_q_oil_rc_m3day + p_q_gas_rc_m3day)
-        p_mu_mix_cP = (p_mu_oil_cP * p_q_oil_rc_m3day / p_q_liq_rc_m3day + _
-                  p_mu_wat_cP * p_q_wat_rc_m3day / p_q_liq_rc_m3day) * (1 - p_gas_fraction_d) + _
-                  p_mu_gas_cP * (1 - p_gas_fraction_d)
+        'p_mu_mix_cP = (p_mu_oil_cP * p_q_oil_rc_m3day / p_q_liq_rc_m3day + _
+        '          p_mu_wat_cP * p_q_wat_rc_m3day / p_q_liq_rc_m3day) * (1 - p_gas_fraction_d) + _
+        '          p_mu_gas_cP * (1 - p_gas_fraction_d) 'VFM костыль
+        p_watercut_rc_perc = p_q_wat_rc_m3day / p_q_liq_rc_m3day 'VFM костыль
+        p_mu_mix_cP = mu_emulsion_mpas(p_watercut_rc_perc, t_c) 'VFM костыль
     Else
         p_gas_fraction_d = 0
         p_mu_mix_cP = 0
