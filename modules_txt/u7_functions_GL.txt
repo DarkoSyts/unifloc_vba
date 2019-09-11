@@ -5,7 +5,7 @@
 ''
 ''=======================================================================================
 Option Explicit
-Function GL_dPgasPipe_atmg(ByVal H_m As Double, ByVal P_atmg As Double, ByVal t_C As Double, _
+Function GL_dPgasPipe_atmg(ByVal H_m As Double, ByVal P_atmg As Double, ByVal t_c As Double, _
                                Optional ByVal d_cas_mm As Double = 125, _
                                Optional ByVal dtub_mm As Double = 73, _
                                Optional ByVal gamma_gas As Double = 0.8, _
@@ -24,21 +24,21 @@ Function GL_dPgasPipe_atmg(ByVal H_m As Double, ByVal P_atmg As Double, ByVal t_
 'T - temperature, C
 'P - pressure, atma
 On Error GoTo err1:
-Dim de, Di, qg_sc, EPS, length, t, P
+Dim de, Di, qg_sc, EPS, length, t, p
 de = d_cas_mm / 1000
 Di = dtub_mm / 1000
 qg_sc = qg_scm3day
 EPS = roughness
 length = H_m
-t = t_C
-P = P_atmg
+t = t_c
+p = P_atmg
     
     'convert m3/d to scf/d
     qg_sc = qg_sc * 3.28 ^ 3
     
     Dim P_MPa As Double, P_psi As Double
-    P_MPa = P * 0.1013 'convert atma to Mpa
-    P_psi = P * 14.696 ' convert atma to psi
+    P_MPa = p * 0.1013 'convert atma to Mpa
+    P_psi = p * 14.696 ' convert atma to psi
     
     
     Dim T_K As Double, t_F As Double
@@ -71,18 +71,18 @@ P = P_atmg
     mu_g = unf_calc_mu_gas_cP(T_K, P_MPa, Z, gamma_gas)
     Dim Re As Double
     Re = 0.020107 * gamma_gas * Abs(qg_sc) * deq / mu_g / DA ^ 2
-    Dim A As Double, B As Double
-    A = (2.457 * Log(1 / ((7 / Re) ^ 0.9 + 0.27 * EPS / deq))) ^ 16
-    B = (37530 / Re) ^ 16
+    Dim a As Double, b As Double
+    a = (2.457 * Log(1 / ((7 / Re) ^ 0.9 + 0.27 * EPS / deq))) ^ 16
+    b = (37530 / Re) ^ 16
     Dim f_moody As Double
-    f_moody = 8 * ((8 / Re) ^ 12 + 1 / ((A + B) ^ 1.5)) ^ (1 / 12)
+    f_moody = 8 * ((8 / Re) ^ 12 + 1 / ((a + b) ^ 1.5)) ^ (1 / 12)
     
     Dim gradP As Double
     
     gradP = -0.018786 * gamma_gas * (P_psi + 14.7) * Sin(THETA * Application.Pi / 180) / (t_F + 460) / Z + (1.2595 * 10 ^ (-11)) * f_moody * (t_F + 460) * Z * gamma_gas * (qg_sc ^ 2) / (P_psi + 14.7) / dh / DA ^ 4
     gradP = gradP * 0.068 / 0.3048 'convert psi/ft to atma/m
     
-    GL_dPgasPipe_atmg = P + gradP * length
+    GL_dPgasPipe_atmg = p + gradP * length
     
     Exit Function
 err1:

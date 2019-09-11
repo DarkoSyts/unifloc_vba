@@ -994,7 +994,7 @@ End Function
 '==========================================================
 '======================== mdlSkinCalc =====================
 '==========================================================
-Public Function tr_getJd(hp, K, spgrpr, por, Kf, Re, Optional Mp = 5) As Double
+Public Function tr_getJd(hp, k, spgrpr, por, Kf, Re, Optional Mp = 5) As Double
     Const mD = 9.869233E-16
     Dim Rw As Double, hf As Double, M As Double
     Dim rp, vf, VR, Nprop
@@ -1002,7 +1002,7 @@ Public Function tr_getJd(hp, K, spgrpr, por, Kf, Re, Optional Mp = 5) As Double
     
     por = por / 100
     Kf = Kf * mD * 1000
-    K = K * mD
+    k = k * mD
     Rw = 0.1
     hf = hp * 1.5
     M = Mp * hp * 1000 / 2
@@ -1011,7 +1011,7 @@ Public Function tr_getJd(hp, K, spgrpr, por, Kf, Re, Optional Mp = 5) As Double
     
     vf = rp * M / ((1 - por) * (1000 * spgrpr))
     VR = hp * Re ^ 2 * const_Pi
-    Nprop = (4 * vf * Kf) / (K * VR)
+    Nprop = (4 * vf * Kf) / (k * VR)
     
     Call FracOpt(Nprop, Jdopt, Cfdopt, Ixopt)
     tr_getJd = Jdopt
@@ -1225,12 +1225,12 @@ Private Sub calc_PVT_TR(ByVal p_atma As Double, ByVal T_K As Double, ByVal rsb_m
 ''        Qgfree = PVT.Qgas_cas_scm3day(ksep_fr)
 '        Call PVT.ModifyfluidTubPVTafterSeparation(pksep_atma, tksep_C, ksep_fr, GasGoesIntoSolution)
 '    End If
-    Dim t_C As Double
-    t_C = T_K - 273
-    PVT.tres_C = t_C
+    Dim t_c As Double
+    t_c = T_K - 273
+    PVT.tres_C = t_c
      
           
-    Call PVT.calc_PVT(p_atma, t_C)
+    Call PVT.calc_PVT(p_atma, t_c)
     
     'bo_m3m3_m3m3 = PVT.bo_m3m3_m3m3
     
@@ -1248,7 +1248,7 @@ Private Sub calc_PVT_TR(ByVal p_atma As Double, ByVal T_K As Double, ByVal rsb_m
     Set PVT = Nothing
 End Sub
 Private Function hasan_kabir_gradient_annuli_znlf(ByVal D_T As Double, ByVal D_C As Double, ByVal THETA As Double, _
-                                  ByVal P As Double, ByVal q_gsc As Double, _
+                                  ByVal p As Double, ByVal q_gsc As Double, _
                                   ByVal b_o As Double, ByVal b_g As Double, ByVal r_s As Double, ByVal sigma_o As Double, _
                                   ByVal rho_osc As Double, ByVal rho_gsc As Double, Optional Units As Integer = 1) As Double
 'function calculates pressure gradient for Zero Net Liquid flow in annulus
@@ -1288,7 +1288,7 @@ c_rho(0) = 16.02: c_rho(1) = 1
 'Convert all values to metric
 D_C = c_l(Units) * D_C
 D_T = c_l(Units) * D_T
-P = c_p(Units) * P
+p = c_p(Units) * p
 r_s = c_rs_m3m3(Units) * r_s
 sigma_o = c_sigma(Units) * sigma_o
 rho_osc = c_rho(Units) * rho_osc
@@ -1484,10 +1484,10 @@ Dim sign As Integer
 Dim counter As Integer
 Dim delta_p As Double
 'workspace to store current pressure, temperature and length, increments for length and temperature
-Dim P As Double
-P = p_sn
+Dim p As Double
+p = p_sn
 Dim p_pvt As Double
-p_pvt = P
+p_pvt = p
 Dim t As Double
 t = T_sn
 Dim t_pvt As Double
@@ -1511,7 +1511,7 @@ Do
   counter = 0
   Do ' iterate calculating PVT at center of segment
     'calculate PVT properties
-    p_pvt = P + 0.5 * delta_p
+    p_pvt = p + 0.5 * delta_p
     t_pvt = t + 0.5 * delta_t
     Call calc_PVT_TR(p_pvt, t_pvt, r_sb, gamma_o, gamma_gas, yukos_standard, p_b, r_s, b_o, mu_o, Z, _
                   b_g, mu_g, b_w, mu_w, p_rb, b_ro, Salinity, gamma_w)
@@ -1528,12 +1528,12 @@ Do
     
     delta_p = sign * dp_dl * delta_l
     counter = counter + 1
-  Loop Until (Abs(p_pvt - (P + 0.5 * delta_p)) < 0.5 Or counter > MaxIter)
-  P = P + delta_p
+  Loop Until (Abs(p_pvt - (p + 0.5 * delta_p)) < 0.5 Or counter > MaxIter)
+  p = p + delta_p
   t = t + delta_t
   L = L + delta_l
 Loop Until (L >= length - 0.001)
-BB_Pressure_Drop = c_pr(Units) * P
+BB_Pressure_Drop = c_pr(Units) * p
 End Function
 Private Function Hasan_Kabir_liquid_column(ByVal D_T As Double, ByVal D_C As Double, ByVal THETA As Double, _
                                   ByVal p_p As Double, ByVal p_c As Double, ByVal q_osc As Double, ByVal e_s As Double, _
@@ -1608,8 +1608,8 @@ rho_osc = gamma_o * const_rho_ref
 Dim rho_gsc As Double
 rho_gsc = gamma_gas * const_rho_air
 'workspace to store current pressure and length, increments for length and temperature
-Dim P As Double
-P = p_p
+Dim p As Double
+p = p_p
 Dim L As Double
 L = 0
 'PVT properties
@@ -1622,7 +1622,7 @@ Dim void As Double
 Dim dp_dl As Double
 'calculate gas rate at standart conditions
 'calculate solution GOR at pump intake
-Call calc_PVT_TR(P, t, r_sb, gamma_o, gamma_gas, yukos_standard, void, r_s, b_o, void, _
+Call calc_PVT_TR(p, t, r_sb, gamma_o, gamma_gas, yukos_standard, void, r_s, b_o, void, _
               void, b_g, void, void, void, p_rb, b_ro, 50000, 1)
 'Calculate gas rate
 Dim q_gsc As Double
@@ -1635,16 +1635,16 @@ If (p_c < p_p) Then
         
       'calculate PVT properties
       '----------------------------------------------------------------
-      Call calc_PVT_TR(P, t, r_sb, gamma_o, gamma_gas, yukos_standard, void, r_s, b_o, void, _
+      Call calc_PVT_TR(p, t, r_sb, gamma_o, gamma_gas, yukos_standard, void, r_s, b_o, void, _
                     void, b_g, void, void, void, p_rb, b_ro, 50000, 1)
       'PVT calculations end --------------------------------------------
-      dp_dl = hasan_kabir_gradient_annuli_znlf(D_T, D_C, THETA, P, q_gsc, b_o, b_g, r_s, sigma_o, rho_osc, rho_gsc, 1)
-      P = P - dp_dl * delta_l
+      dp_dl = hasan_kabir_gradient_annuli_znlf(D_T, D_C, THETA, p, q_gsc, b_o, b_g, r_s, sigma_o, rho_osc, rho_gsc, 1)
+      p = p - dp_dl * delta_l
       L = L + delta_l
       counter = counter + 1
-    Loop Until ((P <= p_c) Or (counter > max_steps))
+    Loop Until ((p <= p_c) Or (counter > max_steps))
     'correct for exceeding p (p < p_c)
-    L = L - (p_c - P) / dp_dl
+    L = L - (p_c - p) / dp_dl
 Else
   L = 0
 End If
@@ -1674,16 +1674,16 @@ Private Function BB_P_In(ByVal D As Double, ByVal length As Double, ByVal THETA 
     
     BB_P_In = BB_Pressure_Drop(D, length, THETA, EPS, p_sn, T_sn, T_en, q_lsc, WCT, gamma_o, gamma_gas, r_sb, Salinity, 0, yukos_standard, 1, p_rb, b_ro)
 End Function
-Private Function GVisc(t As Double, P As Double, Z As Double, gamma_gas As Double)
+Private Function GVisc(t As Double, p As Double, Z As Double, gamma_gas As Double)
     Dim r As Double, mwg As Double, gd As Double
-    Dim A As Double, B As Double, c As Double
+    Dim a As Double, b As Double, c As Double
     r = 1.8 * t
     mwg = 28.966 * gamma_gas
-    gd = P * mwg / (Z * t * 8.31)
-    A = (9.379 + 0.01607 * mwg) * r ^ 1.5 / (209.2 + 19.26 * mwg + r)
-    B = 3.448 + 986.4 / r + 0.01009 * mwg
-    c = 2.447 - 0.2224 * B
-    GVisc = 0.0001 * A * Exp(B * gd ^ c)
+    gd = p * mwg / (Z * t * 8.31)
+    a = (9.379 + 0.01607 * mwg) * r ^ 1.5 / (209.2 + 19.26 * mwg + r)
+    b = 3.448 + 986.4 / r + 0.01009 * mwg
+    c = 2.447 - 0.2224 * b
+    GVisc = 0.0001 * a * Exp(b * gd ^ c)
 End Function
 '=======================================================================
 '====================  pwf_HD_calc_core  ===============================
@@ -2076,7 +2076,7 @@ Private Function PinD_PwfD(ByVal PwfD As Double, ByVal Lind As Double, _
 ' tr_HydCor - корреляция для расчета 1. Хасан Кабир Хасанов
                              
  Dim PinD As Double
- Dim P As Double, L As Double
+ Dim p As Double, L As Double
  
  Dim p1 As Double:
  Dim p2 As Double:
@@ -2085,22 +2085,22 @@ Private Function PinD_PwfD(ByVal PwfD As Double, ByVal Lind As Double, _
  
  ' search sollution
  Do
-  P = (p2 + p1) / 2
+  p = (p2 + p1) / 2
   
   Select Case tr_HydCor
    Case 2, 3, 4
-    L = Lwd_Pwfd_ro(PwfD, P, vsgw, vsl, bo_m3m3, PscD, fw_perc, gamma_gas, tr_HydCor)
+    L = Lwd_Pwfd_ro(PwfD, p, vsgw, vsl, bo_m3m3, PscD, fw_perc, gamma_gas, tr_HydCor)
     
   End Select
   If (Abs(L - Lind) < 0.0001) Or Abs(p1 - p2) < 0.0000001 Then Exit Do ' определиться с точностью !!!
-  If L < Lind Then p1 = P Else p2 = P      ' можно в итоге применить и линейную интерполяцию !!!
+  If L < Lind Then p1 = p Else p2 = p      ' можно в итоге применить и линейную интерполяцию !!!
  Loop
  
- PinD_PwfD = P
+ PinD_PwfD = p
  
  If Abs(p1 - p2) < 0.0000001 Then
  
- PinD_PwfD = P
+ PinD_PwfD = p
  End If
 End Function
 ' Вычисление давления на приеме насоса по газовому фактору
@@ -2271,12 +2271,12 @@ Private Function Pwfd_Pind_pshl(Lind As Double, PinD As Double, _
  Dim p2 As Double:
  Dim S As Integer: S = 1   ' константа уточнение решений для случаев низких давлений насыщания
  Dim L As Double
- Dim P As Double
+ Dim p As Double
  Const Max_PwfD = 10
  
- P = Max_PwfD / 2 ' правильная инициализация переменной для выполнения\ условия цикла
+ p = Max_PwfD / 2 ' правильная инициализация переменной для выполнения\ условия цикла
  
- Do Until (Abs(P - (Max_PwfD * S / 2)) > 0.0000001) ' выполнять до тех пор, пока решение не будет отличаться от оценки правой границы допустимого диапазона
+ Do Until (Abs(p - (Max_PwfD * S / 2)) > 0.0000001) ' выполнять до тех пор, пока решение не будет отличаться от оценки правой границы допустимого диапазона
  
   p1 = PinD
   p2 = Max_PwfD * S
@@ -2287,20 +2287,20 @@ Private Function Pwfd_Pind_pshl(Lind As Double, PinD As Double, _
   ' search sollution
   Do
    'i = i + 1
-   P = (p2 + p1) / 2
+   p = (p2 + p1) / 2
   
    Select Case tr_HydCor
     Case 2, 3, 4
-     L = Lwd_Pwfd_ro(P, PinD, vsgw, vsl, bo_m3m3, PscD, fw_perc, gamma_gas, tr_HydCor)
+     L = Lwd_Pwfd_ro(p, PinD, vsgw, vsl, bo_m3m3, PscD, fw_perc, gamma_gas, tr_HydCor)
     
    End Select
    If (Abs(L - Lind) < 0.0001) Or Abs(p1 - p2) < 0.0000001 Then Exit Do ' определиться с точностью !!!
-   If L < Lind Then p1 = P Else p2 = P      ' можно в итоге применить и линейную интерполяцию !!!
+   If L < Lind Then p1 = p Else p2 = p      ' можно в итоге применить и линейную интерполяцию !!!
   Loop
   
   S = S * 2
  Loop
- Pwfd_Pind_pshl = P
+ Pwfd_Pind_pshl = p
 End Function
 '***************************************************************************************************************'
 '
@@ -2399,7 +2399,7 @@ Private Function Pfd_Ld(PinD As Double, _
  Dim p1 As Double:
  Dim p2 As Double:
  Dim L As Double
- Dim P As Double
+ Dim p As Double
  
  p2 = 0
  p1 = PinD
@@ -2409,17 +2409,17 @@ Private Function Pfd_Ld(PinD As Double, _
  ' search sollution
  Do
   'i = i + 1
-  P = (p2 + p1) / 2
+  p = (p2 + p1) / 2
   
   Select Case tr_HydCor
    Case 2, 3, 4
-    L = Lgd_Pind_Ro(PinD, P, vsgb_0, bo_m3m3, PscD, tr_HydCor, QgMeasured)
+    L = Lgd_Pind_Ro(PinD, p, vsgb_0, bo_m3m3, PscD, tr_HydCor, QgMeasured)
   End Select
   If (Abs(L - Lind) < 0.0001) Or Abs(p1 - p2) < 0.0000001 Then Exit Do ' определиться с точностью !!!
-  If L < Lind Then p1 = P Else p2 = P      ' можно в итоге применить и линейную интерполяцию !!!
+  If L < Lind Then p1 = p Else p2 = p      ' можно в итоге применить и линейную интерполяцию !!!
  Loop
  
- Pfd_Ld = P
+ Pfd_Ld = p
  
  If Abs(p1 - p2) < 0.0000001 Then
      Pfd_Ld = 0
@@ -2790,20 +2790,20 @@ End Function
 '**************************************************************************************
 Private Function Log_Ro_P_calc(vgD As Double, C0 As Double, bo_m3m3 As Double, P1D As Double, P2D As Double, _
                                PscD As Double) As Double
-Dim A As Double, B As Double, c As Double, D As Double, E As Double, F As Double
-A = bo_m3m3 - PscD
-B = (1 - bo_m3m3)
+Dim a As Double, b As Double, c As Double, D As Double, E As Double, F As Double
+a = bo_m3m3 - PscD
+b = (1 - bo_m3m3)
 c = (C0 - 1) * vgD
 D = 1
 E = C0 * vgD
 F = 1
 Dim res As Double
 If bo_m3m3 > 1 Then
-    res = (-Log(A + B * P2D) * F * A * D + Log(A + B * P2D) * E * B * D - _
-        Log(c + D * P2D) * E * B * D + Log(c + D * P2D) * c * F * B + _
-        Log(A + B * P1D) * F * A * D - Log(A + B * P1D) * E * B * D + _
-        Log(c + D * P1D) * E * B * D - Log(c + D * P1D) * c * F * B) _
-        / (-D * A + B * c) / B / D
+    res = (-Log(a + b * P2D) * F * a * D + Log(a + b * P2D) * E * b * D - _
+        Log(c + D * P2D) * E * b * D + Log(c + D * P2D) * c * F * b + _
+        Log(a + b * P1D) * F * a * D - Log(a + b * P1D) * E * b * D + _
+        Log(c + D * P1D) * E * b * D - Log(c + D * P1D) * c * F * b) _
+        / (-D * a + b * c) / b / D
     Log_Ro_P_calc = res * bo_m3m3 * (1 - PscD)
 Else
     res = ((P2D - P1D) * F * D + Log((c + D * P2D) / (c + D * P1D)) _
@@ -2813,20 +2813,20 @@ End If
 End Function
 Private Function Log_Ro_P_calc_down(vgD As Double, C0 As Double, bo_m3m3 As Double, P1D As Double, P2D As Double, _
                                PscD As Double, fw_perc As Double, gamma_gas As Double) As Double
-Dim A As Double, B As Double, c As Double, D As Double, E As Double, F As Double
-A = (bo_m3m3 - 1) * (1 - fw_perc) + (1 - PscD) * (1 - fw_perc + bo_m3m3 / gamma_gas * fw_perc)
-B = (1 - bo_m3m3) * (1 - fw_perc)
+Dim a As Double, b As Double, c As Double, D As Double, E As Double, F As Double
+a = (bo_m3m3 - 1) * (1 - fw_perc) + (1 - PscD) * (1 - fw_perc + bo_m3m3 / gamma_gas * fw_perc)
+b = (1 - bo_m3m3) * (1 - fw_perc)
 c = (C0 - 1) * vgD
 D = 1 - c
 E = C0 * vgD
 F = 1 - E
 Dim res As Double
 If bo_m3m3 > 1 Then
-    res = (-Log(A + B * P2D) * F * A * D + Log(A + B * P2D) * E * B * D - _
-        Log(c + D * P2D) * E * B * D + Log(c + D * P2D) * c * F * B + _
-        Log(A + B * P1D) * F * A * D - Log(A + B * P1D) * E * B * D + _
-        Log(c + D * P1D) * E * B * D - Log(c + D * P1D) * c * F * B) _
-        / (-D * A + B * c) / B / D
+    res = (-Log(a + b * P2D) * F * a * D + Log(a + b * P2D) * E * b * D - _
+        Log(c + D * P2D) * E * b * D + Log(c + D * P2D) * c * F * b + _
+        Log(a + b * P1D) * F * a * D - Log(a + b * P1D) * E * b * D + _
+        Log(c + D * P1D) * E * b * D - Log(c + D * P1D) * c * F * b) _
+        / (-D * a + b * c) / b / D
     Log_Ro_P_calc_down = -res * bo_m3m3 * (1 - PscD)
 Else
 ''  If bo_m3m3 > 1 Then

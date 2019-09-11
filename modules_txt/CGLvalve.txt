@@ -12,7 +12,7 @@ Public p_bellow_sc_atma As Double   ' давление зарядки сильфона на поверхности н
 Public p_in_atma As Double          ' casing pressure at gas valve
 Public p_v_atma As Double           ' pressure between inlet and outlet
 Public p_out_atma As Double         ' tubing pressure at gas valve
-Public t_C As Double             ' casing temperature at gas valve
+Public t_c As Double             ' casing temperature at gas valve
 Public q_gas_inj_scm3day As Double  ' gas rate through valve
 Public crit_flow As Double
 Public p_crit_atma As Double
@@ -111,7 +111,7 @@ Public Property Get p_open_atma() As Double
 End Property
 Public Property Get p_bellow_rc_atma() As Double
     If IPO Then
-        p_bellow_rc_atma = GLV_p_close_atma(p_bellow_sc_atma, t_C)
+        p_bellow_rc_atma = GLV_p_close_atma(p_bellow_sc_atma, t_c)
     Else
         p_bellow_rc_atma = 1
     End If
@@ -134,7 +134,7 @@ Public Function calc_q_gas_sm3day(Optional p_intake_atma As Double = -1, _
     End If
     If p_intake_atma < 0 Then p_intake_atma = Me.p_in_atma
     If p_out_atma < 0 Then p_out_atma = Me.p_out_atma
-    If t_in_C < 0 Then t_in_C = Me.t_C
+    If t_in_C < 0 Then t_in_C = Me.t_c
     
     If (p_out_atma < p_intake_atma) And (p_d_port_mm > 0) And (p_d_vkr_eff_mm = 0) Then
         rslt = GLV_q_gas_sm3day(p_d_port_mm, p_intake_atma, p_out_atma, fluid.gamma_g, t_in_C)
@@ -160,7 +160,7 @@ End Function
 Public Function calc_p_out_atma(p_intake_atma As Double, q_gas_scm3day As Double)
     Me.p_in_atma = p_intake_atma
     Dim res
-    res = GLV_p_vkr_atma(d_port_mm, p_d_vkr_eff_mm, p_intake_atma, q_gas_scm3day, fluid.gamma_g, t_C, True)
+    res = GLV_p_vkr_atma(d_port_mm, p_d_vkr_eff_mm, p_intake_atma, q_gas_scm3day, fluid.gamma_g, t_c, True)
 '    ' ищем давление внутри клапана
 '    If p_d_vkr_eff_mm > 0 Then
 '        p_v_atma = GLV_p_atma(p_d_vkr_eff_mm, p_intake_atma, q_gas_scm3day, fluid.gamma_g, t_C, True)
@@ -192,7 +192,7 @@ Public Function calc_p_in_atma(p_out_atma As Double, q_gas_scm3day As Double)
     Me.p_out_atma = p_out_atma
     ' ищем давление внутри клапана
     Dim res
-    res = GLV_p_vkr_atma(d_port_mm, p_d_vkr_eff_mm, p_out_atma, q_gas_scm3day, fluid.gamma_g, t_C, False)
+    res = GLV_p_vkr_atma(d_port_mm, p_d_vkr_eff_mm, p_out_atma, q_gas_scm3day, fluid.gamma_g, t_c, False)
 '    If p_d_vkr_eff_mm > 0 Then
 '        p_v_atma = GLV_p_atma(p_d_vkr_eff_mm, p_out_atma, q_gas_scm3day, fluid.gamma_g, t_C, False)
 '    Else

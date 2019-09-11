@@ -130,7 +130,7 @@ Public Function GLV_q_gas_sm3day(d_mm As Double, _
                                 p_in_atma As Double, _
                                 p_out_atma As Double, _
                                 gamma_g As Double, _
-                                t_C As Double)
+                                t_c As Double)
 ' d_mm        - диаметр основного порта клапана, мм
 ' p_in_atma   - давление на входе в клапан (затруб), атма
 ' p_out_atma  - давление на выходе клапана (НКТ), атма
@@ -138,7 +138,7 @@ Public Function GLV_q_gas_sm3day(d_mm As Double, _
 ' t_C         - температура клапана, С
 'description_end
 On Error GoTo err1:
-    Dim K As Double
+    Dim k As Double
     Dim d_in As Double
     Dim Pu_psi As Double
     Dim Pd_psi As Double
@@ -147,7 +147,7 @@ On Error GoTo err1:
     Dim CD As Double  ' discharge coefficient
     Dim G As Double
     Dim C0 As Double, C1 As Double, C2 As Double
-    Dim A As Double
+    Dim a As Double
     Dim Qg_crit As Double
     Dim Qg As Double
     Dim Pd_Pu As Double
@@ -168,20 +168,20 @@ On Error GoTo err1:
         Exit Function
     End If
     
-    K = 1.31   ' = Cp/Cv (approx 1.31 for natural gases(R Brown) or 1.25 (Mischenko) )
+    k = 1.31   ' = Cp/Cv (approx 1.31 for natural gases(R Brown) or 1.25 (Mischenko) )
     
     d_in = d_mm * 0.03937
-    A = const_Pi * d_in ^ 2 / 4         'area of choke, sq in.
+    a = const_Pi * d_in ^ 2 / 4         'area of choke, sq in.
     Pu_psi = p_in_atma * 14.2233          'upstream pressure, psi
     Pd_psi = p_out_atma * 14.2233          'downstream pressure, psi
-    Tu_F = t_C / 100 * 180 + 32
-    Pd_Pu_crit = (2 / (K + 1)) ^ (K / (K - 1))
+    Tu_F = t_c / 100 * 180 + 32
+    Pd_Pu_crit = (2 / (k + 1)) ^ (k / (k - 1))
     CD = 0.865
     G = 32.17 'ft/sec^2
     
-    C1 = (Pd_Pu_crit ^ (2 / K) - Pd_Pu_crit ^ (1 + 1 / K)) ^ 0.5
-    C2 = (2 * G * K / (K - 1)) ^ 0.5
-    Qg_crit = 155.5 * CD * A * Pu_psi * C1 * C2 / (gamma_g * (Tu_F + 460)) ^ 0.5 'critical flow ratio, Mcf/d
+    C1 = (Pd_Pu_crit ^ (2 / k) - Pd_Pu_crit ^ (1 + 1 / k)) ^ 0.5
+    C2 = (2 * G * k / (k - 1)) ^ 0.5
+    Qg_crit = 155.5 * CD * a * Pu_psi * C1 * C2 / (gamma_g * (Tu_F + 460)) ^ 0.5 'critical flow ratio, Mcf/d
     
     p_crit_out_atma = p_in_atma * Pd_Pu_crit
     
@@ -190,7 +190,7 @@ On Error GoTo err1:
         p_out_atma = p_crit_out_atma
         crit = True
     Else
-        C0 = ((Pd_Pu ^ (2 / K) - Pd_Pu ^ (1 + 1 / K))) ^ 0.5
+        C0 = ((Pd_Pu ^ (2 / k) - Pd_Pu ^ (1 + 1 / k))) ^ 0.5
         Qg = Qg_crit * 28.31993658 * C0 / C1
         crit = False
     End If
@@ -212,7 +212,7 @@ Public Function GLV_q_gas_vkr_sm3day(d_port_mm As Double, _
                                      p_in_atma As Double, _
                                      p_out_atma As Double, _
                                      gamma_g As Double, _
-                                     t_C As Double)
+                                     t_c As Double)
 ' d_port_mm - диаметр основного порта клапана, мм
 ' d_vkr_mm  - эффективный диаметр вкруток на выходе, мм
 ' p_in_atma   - давление на входе в клапан (затруб), атма
@@ -237,13 +237,13 @@ Public Function GLV_q_gas_vkr_sm3day(d_port_mm As Double, _
     coeffA(2) = p_in_atma
     coeffA(3) = p_out_atma
     coeffA(4) = gamma_g
-    coeffA(5) = t_C
+    coeffA(5) = t_c
     prm.y_tolerance = 0.01
     
     Call solve_equation_bisection(func, p_out_atma, p_in_atma, coeffA, prm)
     pv_atma = prm.x_solution
-    res1 = GLV_q_gas_sm3day(d_port_mm, p_in_atma, pv_atma, gamma_g, t_C)
-    res2 = GLV_q_gas_sm3day(d_vkr_mm, pv_atma, p_out_atma, gamma_g, t_C)
+    res1 = GLV_q_gas_sm3day(d_port_mm, p_in_atma, pv_atma, gamma_g, t_c)
+    res2 = GLV_q_gas_sm3day(d_vkr_mm, pv_atma, p_out_atma, gamma_g, t_c)
     q_gas_sm3day = res1(0)(0)
     crit1 = res1(0)(2)
     crit2 = res2(0)(2)
@@ -260,7 +260,7 @@ Public Function GLV_p_vkr_atma(ByVal d_port_mm As Double, _
                                ByVal p_calc_atma As Double, _
                                ByVal q_gas_sm3day As Double, _
                      Optional ByVal gamma_g As Double = 0.6, _
-                     Optional ByVal t_C As Double = 25, _
+                     Optional ByVal t_c As Double = 25, _
                      Optional ByVal calc_alog_flow As Boolean = False)
 ' d_port_mm     - диаметр порта клапана, мм
 ' d_vkr_mm      - диаметр вкрутки клапана, мм
@@ -289,7 +289,7 @@ On Error GoTo er1:
     crit2 = False
     If calc_alog_flow Then
         p_in = p_calc_atma
-        p1 = GLV_p_atma(d_port_mm, p_in, q_gas_sm3day, gamma_g, t_C, True)
+        p1 = GLV_p_atma(d_port_mm, p_in, q_gas_sm3day, gamma_g, t_c, True)
         p_v_atma = p1(0)(0)
         If p_v_atma < 0 Then
         ' critical flow through the port achived
@@ -299,7 +299,7 @@ On Error GoTo er1:
         End If
     
         If d_vkr_mm > 0 Then
-            p2 = GLV_p_atma(d_vkr_mm, p_v_atma, q_gas_sm3day, gamma_g, t_C, True)
+            p2 = GLV_p_atma(d_vkr_mm, p_v_atma, q_gas_sm3day, gamma_g, t_c, True)
             p_atma = p2(0)(0)
             If p_atma < 0 Then
             ' critical flow through the vkrutka achived
@@ -317,7 +317,7 @@ On Error GoTo er1:
     Else
         p_out = p_calc_atma
         If d_vkr_mm > 0 Then
-            p1 = GLV_p_atma(d_vkr_mm, p_calc_atma, q_gas_sm3day, gamma_g, t_C, False)
+            p1 = GLV_p_atma(d_vkr_mm, p_calc_atma, q_gas_sm3day, gamma_g, t_c, False)
             p_v_atma = p1(0)(0)
             If p_v_atma < 0 Then
             ' critical flow through the vkrutka achived
@@ -328,7 +328,7 @@ On Error GoTo er1:
         Else
             p_v_atma = p_calc_atma
         End If
-        p2 = GLV_p_atma(d_port_mm, p_v_atma, q_gas_sm3day, gamma_g, t_C, False)
+        p2 = GLV_p_atma(d_port_mm, p_v_atma, q_gas_sm3day, gamma_g, t_c, False)
         p_atma = p2(0)(0)
         If p_atma < 0 Then
         ' critical flow through the port achived
@@ -353,7 +353,7 @@ Public Function GLV_p_atma(ByVal d_mm As Double, _
                            ByVal p_calc_atma As Double, _
                            ByVal q_gas_sm3day As Double, _
                            Optional ByVal gamma_g As Double = 0.6, _
-                           Optional ByVal t_C As Double = 25, _
+                           Optional ByVal t_c As Double = 25, _
                            Optional ByVal calc_alog_flow As Boolean = False, _
                            Optional ByVal p_open_atma As Double = 0)
 ' d_mm          - диаметр клапана, мм
@@ -372,7 +372,7 @@ On Error GoTo err1:
     Dim Pd As Double
     Dim Pu As Double
     Dim Pcrit As Double
-    Dim K As Double
+    Dim k As Double
     Dim Pd_Pu_crit As Double
     Dim crit As Boolean
     
@@ -380,18 +380,18 @@ On Error GoTo err1:
     Dim coeffA(4) As Double
     Dim func As String
     
-    K = 1.31   ' = Cp/Cv (approx 1.31 for natural gases(R Brown) or 1.25 (Mischenko) )
-    Pd_Pu_crit = (2 / (K + 1)) ^ (K / (K - 1))
+    k = 1.31   ' = Cp/Cv (approx 1.31 for natural gases(R Brown) or 1.25 (Mischenko) )
+    Pd_Pu_crit = (2 / (k + 1)) ^ (k / (k - 1))
     coeffA(0) = q_gas_sm3day
     coeffA(1) = d_mm
     coeffA(3) = gamma_g
-    coeffA(4) = t_C
+    coeffA(4) = t_c
     prm.y_tolerance = 0.1
     
     If calc_alog_flow Then
         Pu = p_calc_atma
         Pd = 1
-        qres = GLV_q_gas_sm3day(d_mm, Pu, Pd, gamma_g, t_C)
+        qres = GLV_q_gas_sm3day(d_mm, Pu, Pd, gamma_g, t_c)
         Qmax_m3day = qres(0)(0)
         Pcrit = Pd
         If Qmax_m3day > q_gas_sm3day And Pu > p_open_atma Then
@@ -433,7 +433,7 @@ End Function
 ' функция расчета давления зарядки сильфона на стенде при
 ' стандартной температуре по данным рабочих давления и температуры
 Public Function GLV_p_bellow_atma(ByVal p_atma As Double, _
-                                  ByVal t_C As Double) As Double
+                                  ByVal t_c As Double) As Double
 ' p_atma - рабочее давление открытия клапана в скважине, атм
 ' t_C   - рабочая температура открытия клапана в скважине, С
 'description_end
@@ -443,7 +443,7 @@ Dim M As Double
 Dim Pb_psia As Double
     If p_atma > 1 Then
         Pb_psia = p_atma * 14.696
-        t_F = t_C * 9 / 5 + 32
+        t_F = t_c * 9 / 5 + 32
         If Pb_psia < 1238 Then
             M = 0.0000003054 * Pb_psia ^ 2 + 0.001934 * Pb_psia - 0.00226
         Else
@@ -457,7 +457,7 @@ End Function
 ' фукнция расчета давления в сильфоне с азотом
 ' в рабочих условиях при заданной температуре
 Public Function GLV_p_close_atma(ByVal p_bellow_atm As Double, _
-                                 ByVal t_C As Double) As Double
+                                 ByVal t_c As Double) As Double
 ' p_bellow_atm  - давление зарядки сильфона при стандартных условиях
 ' t_C           - температура рабочая
 'description_end
@@ -469,7 +469,7 @@ Dim M As Double
 Dim Pb_psia As Double
     
     Pb_psia = p_bellow_atm * 14.696
-    t_F = t_C * 9 / 5 + 32
+    t_F = t_c * 9 / 5 + 32
     
     If Pb_psia < 1238 Then
         M = 0.0000003054 * Pb_psia ^ 2 + 0.001934 * Pb_psia - 0.00226
@@ -491,7 +491,7 @@ Public Function GLV_d_choke_mm(ByVal q_gas_sm3day As Double, _
                                ByVal p_in_atma As Double, _
                                ByVal p_out_atma As Double, _
                                Optional ByVal gamma_g As Double = 0.6, _
-                               Optional ByVal t_C As Double = 25)
+                               Optional ByVal t_c As Double = 25)
 ' q_gas_sm3day  - расход газа, ст. м3/сут
 ' p_in_atma   - давление на входе в клапан (затруб), атма
 ' p_out_atma   - давление на выходе клапана (НКТ), атма
@@ -508,8 +508,8 @@ On Error GoTo err1:
         GLV_d_choke_mm = -1
         Exit Function
     End If
-    Dim K As Double
-    K = 1.31   ' = Cp/Cv (approx 1.31 for natural gases(R Brown) or 1.25 (Mischenko) )
+    Dim k As Double
+    k = 1.31   ' = Cp/Cv (approx 1.31 for natural gases(R Brown) or 1.25 (Mischenko) )
     
     Dim Pu_psi As Double
     Dim Pd_psi As Double
@@ -517,7 +517,7 @@ On Error GoTo err1:
     Pd_psi = p_out_atma * 14.2233 'downstream pressure, psi
     
     Dim Tu_F As Double
-    Tu_F = t_C / 100 * 180 + 32
+    Tu_F = t_c / 100 * 180 + 32
     
     Dim CD As Double  ' discharge coefficient
     CD = 0.865
@@ -529,26 +529,26 @@ On Error GoTo err1:
     Qg_Mcfd = q_gas_sm3day / 28.31993658
     
     Dim Pd_Pu_crit As Double
-    Pd_Pu_crit = (2 / (K + 1)) ^ (K / (K - 1))
+    Pd_Pu_crit = (2 / (k + 1)) ^ (k / (k - 1))
     
     Dim Pd_Pu As Double
     Pd_Pu = p_out_atma / p_in_atma
     
     Dim C0 As Double, C1 As Double, C2 As Double
-    C0 = ((Pd_Pu ^ (2 / K) - Pd_Pu ^ (1 + 1 / K))) ^ 0.5
-    C1 = (Pd_Pu_crit ^ (2 / K) - Pd_Pu_crit ^ (1 + 1 / K)) ^ 0.5
-    C2 = (2 * G * K / (K - 1)) ^ 0.5
+    C0 = ((Pd_Pu ^ (2 / k) - Pd_Pu ^ (1 + 1 / k))) ^ 0.5
+    C1 = (Pd_Pu_crit ^ (2 / k) - Pd_Pu_crit ^ (1 + 1 / k)) ^ 0.5
+    C2 = (2 * G * k / (k - 1)) ^ 0.5
     
-    Dim A As Double
+    Dim a As Double
     
     If Pd_Pu <= Pd_Pu_crit Then
-        A = Qg_Mcfd / (155.5 * CD * Pu_psi * C1 * C2 / (gamma_g * (Tu_F + 460)) ^ 0.5)
+        a = Qg_Mcfd / (155.5 * CD * Pu_psi * C1 * C2 / (gamma_g * (Tu_F + 460)) ^ 0.5)
     Else
-        A = Qg_Mcfd / (155.5 * CD * Pu_psi * C0 * C2 / (gamma_g * (Tu_F + 460)) ^ 0.5)
+        a = Qg_Mcfd / (155.5 * CD * Pu_psi * C0 * C2 / (gamma_g * (Tu_F + 460)) ^ 0.5)
     End If
     
     Dim d_in As Double
-    d_in = (A * 4 / Application.Pi) ^ 0.5
+    d_in = (a * 4 / Application.Pi) ^ 0.5
     
     GLV_d_choke_mm = d_in / 0.03937
     
@@ -562,7 +562,7 @@ End Function
 'Функция расчета давления открытия газлифтного клапана R1
 Public Function GLV_IPO_p_open(ByVal p_bellow_atma As Double, _
                           ByVal p_out_atma As Double, _
-                          ByVal t_C As Double, _
+                          ByVal t_c As Double, _
                           Optional ByVal d_port_mm As Double, _
                  Optional ByVal GLV_type As Integer = 0, _
                  Optional ByVal d_vkr1_mm As Double = -1, _
@@ -584,7 +584,7 @@ Public Function GLV_IPO_p_open(ByVal p_bellow_atma As Double, _
     Call glv.set_GLV_R1(True, d_port_mm, d_vkr1_mm, d_vkr2_mm, d_vkr3_mm, d_vkr4_mm)
     glv.p_bellow_sc_atma = p_bellow_atma
     glv.p_out_atma = p_out_atma
-    glv.t_C = t_C
+    glv.t_c = t_c
     GLV_IPO_p_open = glv.p_open_atma
 End Function
 'description_to_manual      - для автогенерации описания - помещает заголовок функции и окружающие комментарии в мануал (со след строки)
@@ -593,7 +593,7 @@ Public Function GLV_IPO_p_atma(ByVal p_bellow_atma As Double, _
                           ByVal d_port_mm As Double, _
                           ByVal p_calc_atma As Double, _
                           ByVal q_gas_sm3day As Double, _
-                          ByVal t_C As Double, _
+                          ByVal t_c As Double, _
                  Optional ByVal calc_alog_flow As Boolean = False, _
                  Optional ByVal GLV_type As Integer = 0, _
                  Optional ByVal d_vkr1_mm As Double = -1, _
@@ -620,14 +620,14 @@ Public Function GLV_IPO_p_atma(ByVal p_bellow_atma As Double, _
     Else
         res = glv.calc_p_in_atma(p_calc_atma, q_gas_sm3day)
     End If
-    glv.t_C = t_C
+    glv.t_c = t_c
     GLV_IPO_p_atma = glv.p_open_atma
 End Function
 'description_to_manual      - для автогенерации описания - помещает заголовок функции и окружающие комментарии в мануал (со след строки)
 'Функция расчета давления закрытия газлифтного клапана R1
 Public Function GLV_IPO_p_close(ByVal p_bellow_atma As Double, _
                               ByVal p_out_atma As Double, _
-                              ByVal t_C As Double, _
+                              ByVal t_c As Double, _
                               Optional ByVal d_port_mm As Double, _
                  Optional ByVal GLV_type As Integer = 0, _
                  Optional ByVal d_vkr1_mm As Double = -1, _
@@ -648,6 +648,6 @@ Public Function GLV_IPO_p_close(ByVal p_bellow_atma As Double, _
     
     Call glv.set_GLV_R1(True, d_port_mm, d_vkr1_mm, d_vkr2_mm, d_vkr3_mm, d_vkr4_mm)
     glv.p_bellow_sc_atma = p_bellow_atma
-    glv.t_C = t_C
+    glv.t_c = t_c
     GLV_IPO_p_close = glv.p_open_atma
 End Function

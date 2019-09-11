@@ -72,7 +72,7 @@ class all_ESP_data():
         self.result = None
 
 
-def mass_calculation(well_state):
+def mass_calculation(well_state, debug_print = False):
     this_state = well_state
 
     def calc_well_plin_pwf_atma_for_fsolve(c_calibr_head_d):
@@ -127,9 +127,12 @@ def mass_calculation(well_state):
         power_regulatization = 1 / 1000
         result_for_folve = (p_buf_calc_atm - this_state.p_buf_data_atm) ** 2 + \
                            (power_regulatization * (power_CS_calc_W - this_state.active_power_cs_data_kwt)) ** 2
-        #print("power_CS_calc_W = " + str(power_CS_calc_W))
-        #print("active_power_cs_data_kwt = " + str(this_state.active_power_cs_data_kwt))
-        #print("ошибка на текущем шаге = " + str(result_for_folve))
+        if debug_print:
+            #print("this_state.result = \n")
+            #print(this_state.result)
+            print("power_CS_calc_W = " + str(power_CS_calc_W))
+            print("active_power_cs_data_kwt = " + str(this_state.active_power_cs_data_kwt))
+            print("ошибка на текущем шаге = " + str(result_for_folve))
         return result_for_folve
     result = minimize(calc_well_plin_pwf_atma_for_fsolve, [0.5, 0.5], bounds=[[0, 20], [0, 20]])
 
@@ -168,14 +171,14 @@ for i in range(2):
     this_state.psep_atm = row_in_prepared_data[' Давление на приеме насоса (пласт. жидкость)'] * 10
     this_state.p_wf_atm = row_in_prepared_data[' Давление на приеме насоса (пласт. жидкость)'] * 10
     this_state.active_power_cs_data_kwt = row_in_prepared_data[' Активная мощность'] * 1000
-    this_result = mass_calculation(this_state)
+    this_result = mass_calculation(this_state, True)
     result_list.append(this_result)
     end_in_loop_time = time.time()
     print("Затрачено времени в итерации: " + str(i) + " - " + str(end_in_loop_time - start_in_loop_time))
     new_dict = {}
     for i in range(len(this_result[1])):
         new_dict[this_result[1][i]] = [this_result[0][i]]
-        #print(str(this_result[1][i]) + " -  " + str(this_result[0][i]))
+        print(str(this_result[1][i]) + " -  " + str(this_result[0][i]))
     new_dataframe = pd.DataFrame(new_dict)
     result_dataframe = result_dataframe.append(new_dataframe, sort=False)
 

@@ -101,11 +101,11 @@ Public Function PVT_decode_string( _
 '                и выдаст строку (можно использовать из рабочей книги)
 ' результат - объект CPVT
 'description_end
-    Dim A
+    Dim a
     Dim i As Integer
-    Dim B
+    Dim b
     Dim p_atma As Double
-    Dim t_C
+    Dim t_c
     Dim gamma_gas As Double
     Dim gamma_oil As Double
     Dim gamma_wat As Double
@@ -127,15 +127,15 @@ Public Function PVT_decode_string( _
 ' при разбиении строки на части ошибки недопустимы
 On Error GoTo er1:
     ' пытаемся разбить строку разделителями
-    A = Split(str_PVT, ";")
+    a = Split(str_PVT, ";")
     ' перебираем и сохраняем все параметры
-    For i = LBound(A) To UBound(A)
+    For i = LBound(a) To UBound(a)
         ' только для непустых разбиений
-        If A(i) <> "" Then
-           B = Split(A(i), ":")
+        If a(i) <> "" Then
+           b = Split(a(i), ":")
            'только там где есть значение
-           If UBound(B) = 1 Then
-               dict.item(B(0)) = B(1)
+           If UBound(b) = 1 Then
+               dict.item(b(0)) = b(1)
            End If
         End If
     Next i
@@ -261,10 +261,10 @@ Public Function well_decode_string(ByVal str_well As String, _
 '                       и выдаст строку (можно использовать из листа)
 ' результат - объект CWellESP
 'description_end
-    Dim A
+    Dim a
     Dim S As String
     Dim i As Integer
-    Dim B
+    Dim b
     Dim p_atma As Double
     Dim hperf_m As Double
     Dim hpump_m As Double
@@ -284,15 +284,15 @@ Public Function well_decode_string(ByVal str_well As String, _
 ' при разбиении строки на части ошибки недопустимы
 On Error GoTo er1:
     ' пытаемся разбить строку разделителями
-    A = Split(str_well, ";")
+    a = Split(str_well, ";")
     ' перебираем и сохраняем все параметры
-    For i = LBound(A) To UBound(A)
+    For i = LBound(a) To UBound(a)
         ' только для непустых разбиений
-        If A(i) <> "" Then
-           B = Split(A(i), ":")
+        If a(i) <> "" Then
+           b = Split(a(i), ":")
            'только там где есть значение
-           If UBound(B) = 1 Then
-               dict.item(B(0)) = B(1)
+           If UBound(b) = 1 Then
+               dict.item(b(0)) = b(1)
            End If
         End If
     Next i
@@ -434,10 +434,10 @@ Public Function ESP_decode_string(ByVal str_ESP As String, _
 '                       и выдаст строку (можно использовать из листа)
 ' результат - объект CESPsystemSimple
 'description_end
-    Dim A
+    Dim a
    ' Dim s As String
     Dim i As Integer
-    Dim B
+    Dim b
     Dim p_atma As Double
     Dim esp_ID As Double
     Dim HeadNom_m As Double
@@ -467,15 +467,15 @@ Public Function ESP_decode_string(ByVal str_ESP As String, _
 ' при разбиении строки на части ошибки недопустимы
 On Error GoTo er1:
     ' пытаемся разбить строку разделителями
-    A = Split(str_ESP, ";")
+    a = Split(str_ESP, ";")
     ' перебираем и сохраняем все параметры
-    For i = LBound(A) To UBound(A)
+    For i = LBound(a) To UBound(a)
         ' только для непустых разбиений
-        If A(i) <> "" Then
-           B = Split(A(i), ":")
+        If a(i) <> "" Then
+           b = Split(a(i), ":")
            'только там где есть значение
-           If UBound(B) = 1 Then
-               dict.item(B(0)) = B(1)
+           If UBound(b) = 1 Then
+               dict.item(b(0)) = b(1)
            End If
         End If
     Next i
@@ -565,7 +565,7 @@ Public Function wellGL_decode_string(well_GL_str As String, Optional ByVal getSt
 'description_end
     Dim hperf_m As Double
     Dim S As String
-    Dim A, B
+    Dim a, b
     Dim i As Long
     
     Dim htub_m As Double
@@ -583,15 +583,15 @@ Public Function wellGL_decode_string(well_GL_str As String, Optional ByVal getSt
 ' при разбиении строки на части ошибки недопустимы
 On Error GoTo er1:
     ' пытаемся разбить строку разделителями
-    A = Split(well_GL_str, ";")
+    a = Split(well_GL_str, ";")
     ' перебираем и сохраняем все параметры
-    For i = LBound(A) To UBound(A)
+    For i = LBound(a) To UBound(a)
         ' только для непустых разбиений
-        If A(i) <> "" Then
-           B = Split(A(i), ":")
+        If a(i) <> "" Then
+           b = Split(a(i), ":")
            'только там где есть значение
-           If UBound(B) = 1 Then
-               dict.item(B(0)) = B(1)
+           If UBound(b) = 1 Then
+               dict.item(b(0)) = b(1)
            End If
         End If
     Next i
