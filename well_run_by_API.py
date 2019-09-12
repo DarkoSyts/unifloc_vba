@@ -166,14 +166,18 @@ for i in range(2):
     this_state.qliq_m3day = row_in_prepared_data[' Объемный дебит жидкости']
     this_state.watercut_perc = row_in_prepared_data[' Процент обводненности']
     this_state.rp_m3m3 = row_in_prepared_data['ГФ']
+
     this_state.p_buf_data_atm = row_in_prepared_data['Рбуф']
     this_state.p_wellhead_data_atm = row_in_prepared_data['Рлин ТМ']
-    this_state.p_intake_data_atm = row_in_prepared_data[' Давление на приеме насоса (пласт. жидкость)'] * 10
+
     this_state.tsep_c = row_in_prepared_data[' Температура на приеме насоса (пласт. жидкость)']
     this_state.tres_c = 16
+    this_state.p_intake_data_atm = row_in_prepared_data[' Давление на приеме насоса (пласт. жидкость)'] * 10
     this_state.psep_atm = row_in_prepared_data[' Давление на приеме насоса (пласт. жидкость)'] * 10
     this_state.p_wf_atm = row_in_prepared_data[' Давление на приеме насоса (пласт. жидкость)'] * 10
+
     this_state.active_power_cs_data_kwt = row_in_prepared_data[' Активная мощность'] * 1000
+    this_state.u_motor_data_v = row_in_prepared_data[' Напряжение на выходе ТМПН']
     this_result = mass_calculation(this_state, True)
     result_list.append(this_result)
     end_in_loop_time = time.time()
