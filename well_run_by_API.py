@@ -121,12 +121,14 @@ def mass_calculation(well_state, debug_print = False):
         print(p_buf_calc_atm)"""
 
         #print(this_state.result)
-
+        p_wellhead_calc_atm = result[0][0]
         p_buf_calc_atm = result[0][2]
         power_CS_calc_W = result[0][16]
         power_regulatization = 1 / 1000
         result_for_folve = (p_buf_calc_atm - this_state.p_buf_data_atm) ** 2 + \
                            (power_regulatization * (power_CS_calc_W - this_state.active_power_cs_data_kwt)) ** 2
+        #result_for_folve = (p_wellhead_calc_atm - this_state.p_wellhead_data_atm) ** 2 + \
+        #                  (power_regulatization * (power_CS_calc_W - this_state.active_power_cs_data_kwt)) ** 2
         if debug_print:
             #print("this_state.result = \n")
             #print(this_state.result)
@@ -165,6 +167,7 @@ for i in range(2):
     this_state.watercut_perc = row_in_prepared_data[' Процент обводненности']
     this_state.rp_m3m3 = row_in_prepared_data['ГФ']
     this_state.p_buf_data_atm = row_in_prepared_data['Рбуф']
+    this_state.p_wellhead_data_atm = row_in_prepared_data['Рлин ТМ']
     this_state.p_intake_data_atm = row_in_prepared_data[' Давление на приеме насоса (пласт. жидкость)'] * 10
     this_state.tsep_c = row_in_prepared_data[' Температура на приеме насоса (пласт. жидкость)']
     this_state.tres_c = 16
