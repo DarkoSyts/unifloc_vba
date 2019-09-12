@@ -512,8 +512,8 @@ With fluid
     End If
   
     If param.correlation = BeggsBrill Then
-            dp_dl_arr = unf_BegsBrillGradient(d_m, theta_deg, rough_m, .q_liq_rc_m3day, .q_gas_rc_m3day, .mu_liq_cP, .mu_gas_cP, .sigma_liq_Nm, _
-                                  .rho_liq_rc_kgm3, .rho_gas_rc_kgm3, 0, 1, c_calibr_grav, c_calibr_fric)
+            dp_dl_arr = unf_BegsBrillGradient(d_m, theta_deg, rough_m, .q_liq_rc_m3day, .q_gas_rc_m3day, .mu_mix_cP, .mu_gas_cP, .sigma_liq_Nm, _
+                                  .rho_liq_rc_kgm3, .rho_gas_rc_kgm3, 0, 1, c_calibr_grav, c_calibr_fric) 'VFM .mu_liq_cP на mu_mix_cP
             dp_dl = dp_dl_arr(0)
             dpdlg_out = dp_dl_arr(1)
             dpdlf_out = dp_dl_arr(2)
