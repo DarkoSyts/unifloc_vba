@@ -68,7 +68,7 @@ class all_ESP_data():
         self.c_calibr_head_d = None
         self.c_calibr_rate_d = 1
         self.c_calibr_power_d = 1
-        self.hydr_corr = 0
+        self.hydr_corr = 1 # 0 - BB, 1 - Ansari
         self.result = None
 
 

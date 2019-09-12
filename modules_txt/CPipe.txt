@@ -524,8 +524,8 @@ With fluid
             fpat_out = dp_dl_arr(7)
     ElseIf param.correlation = Ansari Then
             If p_atma > Pcas_atma Then
-                dp_dl_arr = unf_AnsariGradient(d_m, theta_deg, rough_m, .q_liq_rc_m3day, .q_gas_rc_m3day, .mu_liq_cP, .mu_gas_cP, .sigma_liq_Nm, _
-                                  .rho_liq_rc_kgm3, .rho_gas_rc_kgm3, p_atma, , c_calibr_grav, c_calibr_fric)
+                dp_dl_arr = unf_AnsariGradient(d_m, theta_deg, rough_m, .q_liq_rc_m3day, .q_gas_rc_m3day, .mu_mix_cP, .mu_gas_cP, .sigma_liq_Nm, _
+                                  .rho_liq_rc_kgm3, .rho_gas_rc_kgm3, p_atma, , c_calibr_grav, c_calibr_fric) 'VFM .mu_liq_cP на mu_mix_cP
             Else
                 ReDim dp_dl_arr(7) As Double
                 dp_dl_arr(0) = 0
