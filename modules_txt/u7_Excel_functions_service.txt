@@ -360,7 +360,8 @@ Public Function ESP_encode_string( _
                     Optional ByVal c_calibr_rate As Double = 0, _
                     Optional ByVal c_calibr_power As Double = 0, _
                     Optional ByVal PKV_work_min = -1, _
-                    Optional ByVal PKV_stop_min = -1 _
+                    Optional ByVal PKV_stop_min = -1, _
+                    Optional ByVal cos_phi = -1 _
                     )
 ' esp_ID            - идентификатор насоса
 ' HeadNom_m         - номинальный напор системы УЭЦН
@@ -395,6 +396,7 @@ Public Function ESP_encode_string( _
 '                     ПКВ - периодическое кратковременное включение
 '                     если не заданы, то скважина в ПДФ
 '                     ПДФ - постоянно действующий фонд
+' cos_phi           - коэффициент мощности, доли единиц VFM
 ' результат         - строка с параметрами УЭЦН
 'description_end
     Dim str As String
@@ -420,6 +422,7 @@ Public Function ESP_encode_string( _
     str = str & "c_calibr_power:" & Format(c_calibr_power, frmt) & ";"
     str = str & "PKV_work_min:" & Format(PKV_work_min, frmt) & ";"
     str = str & "PKV_stop_min:" & Format(PKV_stop_min, frmt) & ";"
+    str = str & "cos_phi:" & Format(cos_phi, frmt) & ";" 'VFM
     ESP_encode_string = str
     
 End Function
@@ -447,6 +450,7 @@ Public Function ESP_decode_string(ByVal str_ESP As String, _
     Dim tintake_C As Double
     Dim t_dis_C As Double
     Dim KsepGS_fr As Double
+    Dim cos_phi As Double 'VFM
     Dim ESPsys As CESPsystemSimple
     Dim pmp As CESPpump
     Dim dict As New Dictionary
@@ -499,6 +503,7 @@ On Error GoTo er2:
     key = "c_calibr_head": c_calibr_head = Cdbl_(dict.item(key))  'VFM
     key = "c_calibr_rate": c_calibr_rate = Cdbl_(dict.item(key))  'VFM
     key = "c_calibr_power": c_calibr_power = Cdbl_(dict.item(key)) 'VFM
+    key = "cos_phi": cos_phi = Cdbl_(dict.item(key)) 'VFM
     key = "PKV_work_min": PKV_work_min = Cdbl_(dict.item(key))
     key = "PKV_stop_min": PKV_stop_min = Cdbl_(dict.item(key))
 ' при создании объекта все должно пройти идеально
@@ -521,6 +526,7 @@ On Error GoTo er1:
                 Set ESPsys.ESPpump = pmp
                 ESPsys.freq_Hz = ESPfreq_Hz     'VFM
                 ESPsys.U_V = ESP_U_V
+                ESPsys.cos_phi = cos_phi 'VFM
                 ESPsys.power_motor_nom_W = MotorPowerNom_kW * 1000
                 ESPsys.KSepGasSep_fr = KsepGS_fr
                 ESPsys.tintake_C = tintake_C

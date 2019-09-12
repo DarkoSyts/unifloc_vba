@@ -3,6 +3,12 @@
   <component name="ChangeListManager">
     <list default="true" id="b3dcb58b-4a34-49e0-be72-204b8b23e2b7" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UniflocVBA_7.xlam" beforeDir="false" afterPath="$PROJECT_DIR$/UniflocVBA_7.xlam" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/description_generated/all_stuff.txt" beforeDir="false" afterPath="$PROJECT_DIR$/description_generated/all_stuff.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/description_generated/python_api.py" beforeDir="false" afterPath="$PROJECT_DIR$/description_generated/python_api.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/description_generated/report.txt" beforeDir="false" afterPath="$PROJECT_DIR$/description_generated/report.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/description_generated/u7_descriptions.txt" beforeDir="false" afterPath="$PROJECT_DIR$/description_generated/u7_descriptions.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/modules_txt/u7_Excel_functions_service.txt" beforeDir="false" afterPath="$PROJECT_DIR$/modules_txt/u7_Excel_functions_service.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/well_run_by_API.py" beforeDir="false" afterPath="$PROJECT_DIR$/well_run_by_API.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -164,8 +170,8 @@
     <recent_temporary>
       <list>
         <item itemvalue="Python.well_run_by_API" />
-        <item itemvalue="Python tests.pytest in test_VBA_by_unittest.py" />
         <item itemvalue="Python.description_generator" />
+        <item itemvalue="Python tests.pytest in test_VBA_by_unittest.py" />
         <item itemvalue="Python.python_api" />
         <item itemvalue="Python tests.pytest for test_VBA_by_unittest.TestGLV.test_GLV_IPO_p_atma" />
       </list>
@@ -212,7 +218,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/well_run_by_API.py</url>
-          <line>170</line>
+          <line>171</line>
           <option name="timeStamp" value="15" />
         </line-breakpoint>
       </breakpoints>

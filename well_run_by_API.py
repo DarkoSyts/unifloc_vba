@@ -104,7 +104,8 @@ def mass_calculation(well_state, debug_print = False):
                                                    ESP_Hmes_m=this_state.h_tube_m,
                                                    c_calibr_head=c_calibr_head_d,
                                                    c_calibr_rate=c_calibr_rate_d,
-                                                   c_calibr_power=c_calibr_power_d)
+                                                   c_calibr_power=c_calibr_power_d,
+                                                   cos_phi=this_state.cos_phi_data_d)
         result = UniflocVBA.calc_well_plin_pwf_atma(this_state.qliq_m3day, this_state.watercut_perc,
                                                     this_state.p_wf_atm,
                                                     this_state.p_cas_data_atm, Wellstr,
@@ -178,6 +179,7 @@ for i in range(2):
 
     this_state.active_power_cs_data_kwt = row_in_prepared_data[' Активная мощность'] * 1000
     this_state.u_motor_data_v = row_in_prepared_data[' Напряжение на выходе ТМПН']
+    this_state.cos_phi_data_d = row_in_prepared_data[' Коэффициент мощности']
     this_result = mass_calculation(this_state, True)
     result_list.append(this_result)
     end_in_loop_time = time.time()

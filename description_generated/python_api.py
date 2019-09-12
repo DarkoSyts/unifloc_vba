@@ -22,7 +22,7 @@ addin_name_str = "UniflocVBA_7.xlam"
 class API():
     def __init__(self, addin_name_str):
         self.book = xw.Book(addin_name_str)
-    def calc_PVT_bg_m3m3(self, p_atma,t_C,gamma_gas=const_gg_,gamma_oil=const_go_,gamma_wat=const_gw_,rsb_m3m3=const_rsb_default,rp_m3m3=-1,pb_atma=-1,tres_C=const_tres_default,bob_m3m3=-1,muob_cP=-1,PVTcorr=Standing_based,ksep_fr=0,pksep_atma=-1,tksep_C=-1,str_PVT=""):
+    def calc_PVT_bg_m3m3(self, p_atma,t_c,gamma_gas=const_gg_,gamma_oil=const_go_,gamma_wat=const_gw_,rsb_m3m3=const_rsb_default,rp_m3m3=-1,pb_atma=-1,tres_C=const_tres_default,bob_m3m3=-1,muob_cP=-1,PVTcorr=Standing_based,ksep_fr=0,pksep_atma=-1,tksep_C=-1,str_PVT=""):
         """" функция расчета объемного коэффициента газа
         
                     p_atma давление, атм    
@@ -60,9 +60,9 @@ class API():
         """
 
         self.PVT_bg_m3m3 = self.book.macro("PVT_bg_m3m3")
-        return self.PVT_bg_m3m3(p_atma,t_C,gamma_gas,gamma_oil,gamma_wat,rsb_m3m3,rp_m3m3,pb_atma,tres_C,bob_m3m3,muob_cP,PVTcorr,ksep_fr,pksep_atma,tksep_C,str_PVT)
+        return self.PVT_bg_m3m3(p_atma,t_c,gamma_gas,gamma_oil,gamma_wat,rsb_m3m3,rp_m3m3,pb_atma,tres_C,bob_m3m3,muob_cP,PVTcorr,ksep_fr,pksep_atma,tksep_C,str_PVT)
 
-    def calc_PVT_bo_m3m3(self, p_atma,t_C,gamma_gas=const_gg_,gamma_oil=const_go_,gamma_wat=const_gw_,rsb_m3m3=const_rsb_default,rp_m3m3=-1,pb_atma=-1,tres_C=const_tres_default,bob_m3m3=-1,muob_cP=-1,PVTcorr=Standing_based,ksep_fr=0,pksep_atma=-1,tksep_C=-1,str_PVT=""):
+    def calc_PVT_bo_m3m3(self, p_atma,t_c,gamma_gas=const_gg_,gamma_oil=const_go_,gamma_wat=const_gw_,rsb_m3m3=const_rsb_default,rp_m3m3=-1,pb_atma=-1,tres_C=const_tres_default,bob_m3m3=-1,muob_cP=-1,PVTcorr=Standing_based,ksep_fr=0,pksep_atma=-1,tksep_C=-1,str_PVT=""):
         """" расчет объемного коэффициента нефти
         
                     p_atma давление, атм    
@@ -100,9 +100,9 @@ class API():
         """
 
         self.PVT_bo_m3m3 = self.book.macro("PVT_bo_m3m3")
-        return self.PVT_bo_m3m3(p_atma,t_C,gamma_gas,gamma_oil,gamma_wat,rsb_m3m3,rp_m3m3,pb_atma,tres_C,bob_m3m3,muob_cP,PVTcorr,ksep_fr,pksep_atma,tksep_C,str_PVT)
+        return self.PVT_bo_m3m3(p_atma,t_c,gamma_gas,gamma_oil,gamma_wat,rsb_m3m3,rp_m3m3,pb_atma,tres_C,bob_m3m3,muob_cP,PVTcorr,ksep_fr,pksep_atma,tksep_C,str_PVT)
 
-    def calc_PVT_bw_m3m3(self, p_atma,t_C,gamma_gas=const_gg_,gamma_oil=const_go_,gamma_wat=const_gw_,rsb_m3m3=const_rsb_default,rp_m3m3=-1,pb_atma=-1,tres_C=const_tres_default,bob_m3m3=-1,muob_cP=-1,PVTcorr=Standing_based,ksep_fr=0,pksep_atma=-1,tksep_C=-1,str_PVT=""):
+    def calc_PVT_bw_m3m3(self, p_atma,t_c,gamma_gas=const_gg_,gamma_oil=const_go_,gamma_wat=const_gw_,rsb_m3m3=const_rsb_default,rp_m3m3=-1,pb_atma=-1,tres_C=const_tres_default,bob_m3m3=-1,muob_cP=-1,PVTcorr=Standing_based,ksep_fr=0,pksep_atma=-1,tksep_C=-1,str_PVT=""):
         """" расчет объемного коэффициента воды
         
                     p_atma давление, атм    
@@ -140,9 +140,9 @@ class API():
         """
 
         self.PVT_bw_m3m3 = self.book.macro("PVT_bw_m3m3")
-        return self.PVT_bw_m3m3(p_atma,t_C,gamma_gas,gamma_oil,gamma_wat,rsb_m3m3,rp_m3m3,pb_atma,tres_C,bob_m3m3,muob_cP,PVTcorr,ksep_fr,pksep_atma,tksep_C,str_PVT)
+        return self.PVT_bw_m3m3(p_atma,t_c,gamma_gas,gamma_oil,gamma_wat,rsb_m3m3,rp_m3m3,pb_atma,tres_C,bob_m3m3,muob_cP,PVTcorr,ksep_fr,pksep_atma,tksep_C,str_PVT)
 
-    def calc_PVT_salinity_ppm(self, p_atma,t_C,gamma_gas=const_gg_,gamma_oil=const_go_,gamma_wat=const_gw_,rsb_m3m3=const_rsb_default,rp_m3m3=-1,pb_atma=-1,tres_C=const_tres_default,bob_m3m3=-1,muob_cP=-1,PVTcorr=Standing_based,ksep_fr=0,pksep_atma=-1,tksep_C=-1,str_PVT=""):
+    def calc_PVT_salinity_ppm(self, p_atma,t_c,gamma_gas=const_gg_,gamma_oil=const_go_,gamma_wat=const_gw_,rsb_m3m3=const_rsb_default,rp_m3m3=-1,pb_atma=-1,tres_C=const_tres_default,bob_m3m3=-1,muob_cP=-1,PVTcorr=Standing_based,ksep_fr=0,pksep_atma=-1,tksep_C=-1,str_PVT=""):
         """" расчет солености воды
         
                     p_atma давление, атм    
@@ -180,9 +180,9 @@ class API():
         """
 
         self.PVT_salinity_ppm = self.book.macro("PVT_salinity_ppm")
-        return self.PVT_salinity_ppm(p_atma,t_C,gamma_gas,gamma_oil,gamma_wat,rsb_m3m3,rp_m3m3,pb_atma,tres_C,bob_m3m3,muob_cP,PVTcorr,ksep_fr,pksep_atma,tksep_C,str_PVT)
+        return self.PVT_salinity_ppm(p_atma,t_c,gamma_gas,gamma_oil,gamma_wat,rsb_m3m3,rp_m3m3,pb_atma,tres_C,bob_m3m3,muob_cP,PVTcorr,ksep_fr,pksep_atma,tksep_C,str_PVT)
 
-    def calc_PVT_mu_oil_cP(self, p_atma,t_C,gamma_gas=const_gg_,gamma_oil=const_go_,gamma_wat=const_gw_,rsb_m3m3=const_rsb_default,rp_m3m3=-1,pb_atma=-1,tres_C=const_tres_default,bob_m3m3=-1,muob_cP=-1,PVTcorr=Standing_based,ksep_fr=0,pksep_atma=-1,tksep_C=-1,str_PVT=""):
+    def calc_PVT_mu_oil_cP(self, p_atma,t_c,gamma_gas=const_gg_,gamma_oil=const_go_,gamma_wat=const_gw_,rsb_m3m3=const_rsb_default,rp_m3m3=-1,pb_atma=-1,tres_C=const_tres_default,bob_m3m3=-1,muob_cP=-1,PVTcorr=Standing_based,ksep_fr=0,pksep_atma=-1,tksep_C=-1,str_PVT=""):
         """" расчет вязкости нефти
         
                     p_atma давление, атм    
@@ -220,9 +220,9 @@ class API():
         """
 
         self.PVT_mu_oil_cP = self.book.macro("PVT_mu_oil_cP")
-        return self.PVT_mu_oil_cP(p_atma,t_C,gamma_gas,gamma_oil,gamma_wat,rsb_m3m3,rp_m3m3,pb_atma,tres_C,bob_m3m3,muob_cP,PVTcorr,ksep_fr,pksep_atma,tksep_C,str_PVT)
+        return self.PVT_mu_oil_cP(p_atma,t_c,gamma_gas,gamma_oil,gamma_wat,rsb_m3m3,rp_m3m3,pb_atma,tres_C,bob_m3m3,muob_cP,PVTcorr,ksep_fr,pksep_atma,tksep_C,str_PVT)
 
-    def calc_PVT_mu_gas_cP(self, p_atma,t_C,gamma_gas=const_gg_,gamma_oil=const_go_,gamma_wat=const_gw_,rsb_m3m3=const_rsb_default,rp_m3m3=-1,pb_atma=-1,tres_C=const_tres_default,bob_m3m3=-1,muob_cP=-1,PVTcorr=Standing_based,ksep_fr=0,pksep_atma=-1,tksep_C=-1,str_PVT=""):
+    def calc_PVT_mu_gas_cP(self, p_atma,t_c,gamma_gas=const_gg_,gamma_oil=const_go_,gamma_wat=const_gw_,rsb_m3m3=const_rsb_default,rp_m3m3=-1,pb_atma=-1,tres_C=const_tres_default,bob_m3m3=-1,muob_cP=-1,PVTcorr=Standing_based,ksep_fr=0,pksep_atma=-1,tksep_C=-1,str_PVT=""):
         """" расчет вязкости газа
         
                     p_atma давление, атм    
@@ -260,9 +260,9 @@ class API():
         """
 
         self.PVT_mu_gas_cP = self.book.macro("PVT_mu_gas_cP")
-        return self.PVT_mu_gas_cP(p_atma,t_C,gamma_gas,gamma_oil,gamma_wat,rsb_m3m3,rp_m3m3,pb_atma,tres_C,bob_m3m3,muob_cP,PVTcorr,ksep_fr,pksep_atma,tksep_C,str_PVT)
+        return self.PVT_mu_gas_cP(p_atma,t_c,gamma_gas,gamma_oil,gamma_wat,rsb_m3m3,rp_m3m3,pb_atma,tres_C,bob_m3m3,muob_cP,PVTcorr,ksep_fr,pksep_atma,tksep_C,str_PVT)
 
-    def calc_PVT_mu_wat_cP(self, p_atma,t_C,gamma_gas=const_gg_,gamma_oil=const_go_,gamma_wat=const_gw_,rsb_m3m3=const_rsb_default,rp_m3m3=-1,pb_atma=-1,tres_C=const_tres_default,bob_m3m3=-1,muob_cP=-1,PVTcorr=Standing_based,ksep_fr=0,pksep_atma=-1,tksep_C=-1,str_PVT=""):
+    def calc_PVT_mu_wat_cP(self, p_atma,t_c,gamma_gas=const_gg_,gamma_oil=const_go_,gamma_wat=const_gw_,rsb_m3m3=const_rsb_default,rp_m3m3=-1,pb_atma=-1,tres_C=const_tres_default,bob_m3m3=-1,muob_cP=-1,PVTcorr=Standing_based,ksep_fr=0,pksep_atma=-1,tksep_C=-1,str_PVT=""):
         """" расчет вязкости воды
         
                     p_atma давление, атм    
@@ -300,9 +300,9 @@ class API():
         """
 
         self.PVT_mu_wat_cP = self.book.macro("PVT_mu_wat_cP")
-        return self.PVT_mu_wat_cP(p_atma,t_C,gamma_gas,gamma_oil,gamma_wat,rsb_m3m3,rp_m3m3,pb_atma,tres_C,bob_m3m3,muob_cP,PVTcorr,ksep_fr,pksep_atma,tksep_C,str_PVT)
+        return self.PVT_mu_wat_cP(p_atma,t_c,gamma_gas,gamma_oil,gamma_wat,rsb_m3m3,rp_m3m3,pb_atma,tres_C,bob_m3m3,muob_cP,PVTcorr,ksep_fr,pksep_atma,tksep_C,str_PVT)
 
-    def calc_PVT_rs_m3m3(self, p_atma,t_C,gamma_gas=const_gg_,gamma_oil=const_go_,gamma_wat=const_gw_,rsb_m3m3=const_rsb_default,rp_m3m3=-1,pb_atma=-1,tres_C=const_tres_default,bob_m3m3=-1,muob_cP=-1,PVTcorr=Standing_based,ksep_fr=0,pksep_atma=-1,tksep_C=-1,str_PVT=""):
+    def calc_PVT_rs_m3m3(self, p_atma,t_c,gamma_gas=const_gg_,gamma_oil=const_go_,gamma_wat=const_gw_,rsb_m3m3=const_rsb_default,rp_m3m3=-1,pb_atma=-1,tres_C=const_tres_default,bob_m3m3=-1,muob_cP=-1,PVTcorr=Standing_based,ksep_fr=0,pksep_atma=-1,tksep_C=-1,str_PVT=""):
         """" расчет газосодержания
         
                     p_atma давление, атм    
@@ -340,9 +340,9 @@ class API():
         """
 
         self.PVT_rs_m3m3 = self.book.macro("PVT_rs_m3m3")
-        return self.PVT_rs_m3m3(p_atma,t_C,gamma_gas,gamma_oil,gamma_wat,rsb_m3m3,rp_m3m3,pb_atma,tres_C,bob_m3m3,muob_cP,PVTcorr,ksep_fr,pksep_atma,tksep_C,str_PVT)
+        return self.PVT_rs_m3m3(p_atma,t_c,gamma_gas,gamma_oil,gamma_wat,rsb_m3m3,rp_m3m3,pb_atma,tres_C,bob_m3m3,muob_cP,PVTcorr,ksep_fr,pksep_atma,tksep_C,str_PVT)
 
-    def calc_PVT_z(self, p_atma,t_C,gamma_gas=const_gg_,gamma_oil=const_go_,gamma_wat=const_gw_,rsb_m3m3=const_rsb_default,rp_m3m3=-1,pb_atma=-1,tres_C=const_tres_default,bob_m3m3=-1,muob_cP=-1,PVTcorr=Standing_based,ksep_fr=0,pksep_atma=-1,tksep_C=-1,str_PVT=""):
+    def calc_PVT_z(self, p_atma,t_c,gamma_gas=const_gg_,gamma_oil=const_go_,gamma_wat=const_gw_,rsb_m3m3=const_rsb_default,rp_m3m3=-1,pb_atma=-1,tres_C=const_tres_default,bob_m3m3=-1,muob_cP=-1,PVTcorr=Standing_based,ksep_fr=0,pksep_atma=-1,tksep_C=-1,str_PVT=""):
         """" расчет коэффициента сверхсжимаемости газа
         
                     p_atma давление, атм    
@@ -380,9 +380,9 @@ class API():
         """
 
         self.PVT_z = self.book.macro("PVT_z")
-        return self.PVT_z(p_atma,t_C,gamma_gas,gamma_oil,gamma_wat,rsb_m3m3,rp_m3m3,pb_atma,tres_C,bob_m3m3,muob_cP,PVTcorr,ksep_fr,pksep_atma,tksep_C,str_PVT)
+        return self.PVT_z(p_atma,t_c,gamma_gas,gamma_oil,gamma_wat,rsb_m3m3,rp_m3m3,pb_atma,tres_C,bob_m3m3,muob_cP,PVTcorr,ksep_fr,pksep_atma,tksep_C,str_PVT)
 
-    def calc_PVT_rhoo_kgm3(self, p_atma,t_C,gamma_gas=const_gg_,gamma_oil=const_go_,gamma_wat=const_gw_,rsb_m3m3=const_rsb_default,rp_m3m3=-1,pb_atma=-1,tres_C=const_tres_default,bob_m3m3=-1,muob_cP=-1,PVTcorr=Standing_based,ksep_fr=0,pksep_atma=-1,tksep_C=-1,str_PVT=""):
+    def calc_PVT_rhoo_kgm3(self, p_atma,t_c,gamma_gas=const_gg_,gamma_oil=const_go_,gamma_wat=const_gw_,rsb_m3m3=const_rsb_default,rp_m3m3=-1,pb_atma=-1,tres_C=const_tres_default,bob_m3m3=-1,muob_cP=-1,PVTcorr=Standing_based,ksep_fr=0,pksep_atma=-1,tksep_C=-1,str_PVT=""):
         """" расчет плотности нефти
         
                     p_atma давление, атм    
@@ -420,9 +420,9 @@ class API():
         """
 
         self.PVT_rhoo_kgm3 = self.book.macro("PVT_rhoo_kgm3")
-        return self.PVT_rhoo_kgm3(p_atma,t_C,gamma_gas,gamma_oil,gamma_wat,rsb_m3m3,rp_m3m3,pb_atma,tres_C,bob_m3m3,muob_cP,PVTcorr,ksep_fr,pksep_atma,tksep_C,str_PVT)
+        return self.PVT_rhoo_kgm3(p_atma,t_c,gamma_gas,gamma_oil,gamma_wat,rsb_m3m3,rp_m3m3,pb_atma,tres_C,bob_m3m3,muob_cP,PVTcorr,ksep_fr,pksep_atma,tksep_C,str_PVT)
 
-    def calc_PVT_rhog_kgm3(self, p_atma,t_C,gamma_gas=const_gg_,gamma_oil=const_go_,gamma_wat=const_gw_,rsb_m3m3=const_rsb_default,rp_m3m3=-1,pb_atma=-1,tres_C=const_tres_default,bob_m3m3=-1,muob_cP=-1,PVTcorr=Standing_based,ksep_fr=0,pksep_atma=-1,tksep_C=-1,str_PVT=""):
+    def calc_PVT_rhog_kgm3(self, p_atma,t_c,gamma_gas=const_gg_,gamma_oil=const_go_,gamma_wat=const_gw_,rsb_m3m3=const_rsb_default,rp_m3m3=-1,pb_atma=-1,tres_C=const_tres_default,bob_m3m3=-1,muob_cP=-1,PVTcorr=Standing_based,ksep_fr=0,pksep_atma=-1,tksep_C=-1,str_PVT=""):
         """" расчет плотности газа
         
                     p_atma давление, атм    
@@ -460,9 +460,9 @@ class API():
         """
 
         self.PVT_rhog_kgm3 = self.book.macro("PVT_rhog_kgm3")
-        return self.PVT_rhog_kgm3(p_atma,t_C,gamma_gas,gamma_oil,gamma_wat,rsb_m3m3,rp_m3m3,pb_atma,tres_C,bob_m3m3,muob_cP,PVTcorr,ksep_fr,pksep_atma,tksep_C,str_PVT)
+        return self.PVT_rhog_kgm3(p_atma,t_c,gamma_gas,gamma_oil,gamma_wat,rsb_m3m3,rp_m3m3,pb_atma,tres_C,bob_m3m3,muob_cP,PVTcorr,ksep_fr,pksep_atma,tksep_C,str_PVT)
 
-    def calc_PVT_rhow_kgm3(self, p_atma,t_C,gamma_gas=const_gg_,gamma_oil=const_go_,gamma_wat=const_gw_,rsb_m3m3=const_rsb_default,rp_m3m3=-1,pb_atma=-1,tres_C=const_tres_default,bob_m3m3=-1,muob_cP=-1,PVTcorr=Standing_based,ksep_fr=0,pksep_atma=-1,tksep_C=-1,str_PVT=""):
+    def calc_PVT_rhow_kgm3(self, p_atma,t_c,gamma_gas=const_gg_,gamma_oil=const_go_,gamma_wat=const_gw_,rsb_m3m3=const_rsb_default,rp_m3m3=-1,pb_atma=-1,tres_C=const_tres_default,bob_m3m3=-1,muob_cP=-1,PVTcorr=Standing_based,ksep_fr=0,pksep_atma=-1,tksep_C=-1,str_PVT=""):
         """" расчет плотности воды
         
                     p_atma давление, атм    
@@ -500,9 +500,9 @@ class API():
         """
 
         self.PVT_rhow_kgm3 = self.book.macro("PVT_rhow_kgm3")
-        return self.PVT_rhow_kgm3(p_atma,t_C,gamma_gas,gamma_oil,gamma_wat,rsb_m3m3,rp_m3m3,pb_atma,tres_C,bob_m3m3,muob_cP,PVTcorr,ksep_fr,pksep_atma,tksep_C,str_PVT)
+        return self.PVT_rhow_kgm3(p_atma,t_c,gamma_gas,gamma_oil,gamma_wat,rsb_m3m3,rp_m3m3,pb_atma,tres_C,bob_m3m3,muob_cP,PVTcorr,ksep_fr,pksep_atma,tksep_C,str_PVT)
 
-    def calc_PVT_pb_atma(self, t_C,gamma_gas=const_gg_,gamma_oil=const_go_,gamma_wat=const_gw_,rsb_m3m3=const_rsb_default,rp_m3m3=-1,pb_atma=-1,tres_C=const_tres_default,bob_m3m3=-1,muob_cP=-1,PVTcorr=Standing_based,ksep_fr=0,pksep_atma=-1,tksep_C=-1,str_PVT=""):
+    def calc_PVT_pb_atma(self, t_c,gamma_gas=const_gg_,gamma_oil=const_go_,gamma_wat=const_gw_,rsb_m3m3=const_rsb_default,rp_m3m3=-1,pb_atma=-1,tres_C=const_tres_default,bob_m3m3=-1,muob_cP=-1,PVTcorr=Standing_based,ksep_fr=0,pksep_atma=-1,tksep_C=-1,str_PVT=""):
         """" Расчет давления насыщения
         
                     t_c температура, с.    
@@ -538,9 +538,9 @@ class API():
         """
 
         self.PVT_pb_atma = self.book.macro("PVT_pb_atma")
-        return self.PVT_pb_atma(t_C,gamma_gas,gamma_oil,gamma_wat,rsb_m3m3,rp_m3m3,pb_atma,tres_C,bob_m3m3,muob_cP,PVTcorr,ksep_fr,pksep_atma,tksep_C,str_PVT)
+        return self.PVT_pb_atma(t_c,gamma_gas,gamma_oil,gamma_wat,rsb_m3m3,rp_m3m3,pb_atma,tres_C,bob_m3m3,muob_cP,PVTcorr,ksep_fr,pksep_atma,tksep_C,str_PVT)
 
-    def calc_PVT_SToilgas_Nm(self, p_atma,t_C,gamma_gas=const_gg_,gamma_oil=const_go_,gamma_wat=const_gw_,rsb_m3m3=const_rsb_default,rp_m3m3=-1,pb_atma=-1,tres_C=const_tres_default,bob_m3m3=-1,muob_cP=-1,PVTcorr=Standing_based,ksep_fr=0,pksep_atma=-1,tksep_C=-1,str_PVT=""):
+    def calc_PVT_SToilgas_Nm(self, p_atma,t_c,gamma_gas=const_gg_,gamma_oil=const_go_,gamma_wat=const_gw_,rsb_m3m3=const_rsb_default,rp_m3m3=-1,pb_atma=-1,tres_C=const_tres_default,bob_m3m3=-1,muob_cP=-1,PVTcorr=Standing_based,ksep_fr=0,pksep_atma=-1,tksep_C=-1,str_PVT=""):
         """" расчет коэффициента поверхностного натяжения нефть - газ
         
                     p_atma давление, атм    
@@ -578,9 +578,9 @@ class API():
         """
 
         self.PVT_SToilgas_Nm = self.book.macro("PVT_SToilgas_Nm")
-        return self.PVT_SToilgas_Nm(p_atma,t_C,gamma_gas,gamma_oil,gamma_wat,rsb_m3m3,rp_m3m3,pb_atma,tres_C,bob_m3m3,muob_cP,PVTcorr,ksep_fr,pksep_atma,tksep_C,str_PVT)
+        return self.PVT_SToilgas_Nm(p_atma,t_c,gamma_gas,gamma_oil,gamma_wat,rsb_m3m3,rp_m3m3,pb_atma,tres_C,bob_m3m3,muob_cP,PVTcorr,ksep_fr,pksep_atma,tksep_C,str_PVT)
 
-    def calc_PVT_STwatgas_Nm(self, p_atma,t_C,gamma_gas=const_gg_,gamma_oil=const_go_,gamma_wat=const_gw_,rsb_m3m3=const_rsb_default,rp_m3m3=-1,pb_atma=-1,tres_C=const_tres_default,bob_m3m3=-1,muob_cP=-1,PVTcorr=Standing_based,ksep_fr=0,pksep_atma=-1,tksep_C=-1,str_PVT=""):
+    def calc_PVT_STwatgas_Nm(self, p_atma,t_c,gamma_gas=const_gg_,gamma_oil=const_go_,gamma_wat=const_gw_,rsb_m3m3=const_rsb_default,rp_m3m3=-1,pb_atma=-1,tres_C=const_tres_default,bob_m3m3=-1,muob_cP=-1,PVTcorr=Standing_based,ksep_fr=0,pksep_atma=-1,tksep_C=-1,str_PVT=""):
         """" расчет коэффициента поверхностного натяжения вода - газ
         
                     p_atma давление, атм    
@@ -618,9 +618,9 @@ class API():
         """
 
         self.PVT_STwatgas_Nm = self.book.macro("PVT_STwatgas_Nm")
-        return self.PVT_STwatgas_Nm(p_atma,t_C,gamma_gas,gamma_oil,gamma_wat,rsb_m3m3,rp_m3m3,pb_atma,tres_C,bob_m3m3,muob_cP,PVTcorr,ksep_fr,pksep_atma,tksep_C,str_PVT)
+        return self.PVT_STwatgas_Nm(p_atma,t_c,gamma_gas,gamma_oil,gamma_wat,rsb_m3m3,rp_m3m3,pb_atma,tres_C,bob_m3m3,muob_cP,PVTcorr,ksep_fr,pksep_atma,tksep_C,str_PVT)
 
-    def calc_PVT_STliqgas_Nm(self, p_atma,t_C,gamma_gas=const_gg_,gamma_oil=const_go_,gamma_wat=const_gw_,rsb_m3m3=const_rsb_default,rp_m3m3=-1,pb_atma=-1,tres_C=const_tres_default,bob_m3m3=-1,muob_cP=-1,PVTcorr=Standing_based,ksep_fr=0,pksep_atma=-1,tksep_C=-1,str_PVT=""):
+    def calc_PVT_STliqgas_Nm(self, p_atma,t_c,gamma_gas=const_gg_,gamma_oil=const_go_,gamma_wat=const_gw_,rsb_m3m3=const_rsb_default,rp_m3m3=-1,pb_atma=-1,tres_C=const_tres_default,bob_m3m3=-1,muob_cP=-1,PVTcorr=Standing_based,ksep_fr=0,pksep_atma=-1,tksep_C=-1,str_PVT=""):
         """" расчет коэффициента поверхностного натяжения жидкость - газ
         
                     p_atma давление, атм    
@@ -658,9 +658,9 @@ class API():
         """
 
         self.PVT_STliqgas_Nm = self.book.macro("PVT_STliqgas_Nm")
-        return self.PVT_STliqgas_Nm(p_atma,t_C,gamma_gas,gamma_oil,gamma_wat,rsb_m3m3,rp_m3m3,pb_atma,tres_C,bob_m3m3,muob_cP,PVTcorr,ksep_fr,pksep_atma,tksep_C,str_PVT)
+        return self.PVT_STliqgas_Nm(p_atma,t_c,gamma_gas,gamma_oil,gamma_wat,rsb_m3m3,rp_m3m3,pb_atma,tres_C,bob_m3m3,muob_cP,PVTcorr,ksep_fr,pksep_atma,tksep_C,str_PVT)
 
-    def calc_MF_CJT_Katm(self, p_atma,t_C,str_PVT=PVT_DEFAULT,qliq_sm3day=10,fw_perc=0):
+    def calc_MF_CJT_Katm(self, p_atma,t_c,str_PVT=PVT_DEFAULT,qliq_sm3day=10,fw_perc=0):
         """" функция расчета коэффициента Джоуля Томсона
         
                     p_atma - давление, атм    
@@ -676,9 +676,9 @@ class API():
         """
 
         self.MF_CJT_Katm = self.book.macro("MF_CJT_Katm")
-        return self.MF_CJT_Katm(p_atma,t_C,str_PVT,qliq_sm3day,fw_perc)
+        return self.MF_CJT_Katm(p_atma,t_c,str_PVT,qliq_sm3day,fw_perc)
 
-    def calc_MF_q_mix_rc_m3day(self, qliq_sm3day,fw_perc,p_atma,t_C,str_PVT=""):
+    def calc_MF_q_mix_rc_m3day(self, qliq_sm3day,fw_perc,p_atma,t_c,str_PVT=""):
         """" расчет объемного расхода газожидкостной смеси  для заданных термобарических условий
         
                     qliq_sm3day- дебит жидкости на поверхности    
@@ -694,9 +694,9 @@ class API():
         """
 
         self.MF_q_mix_rc_m3day = self.book.macro("MF_q_mix_rc_m3day")
-        return self.MF_q_mix_rc_m3day(qliq_sm3day,fw_perc,p_atma,t_C,str_PVT)
+        return self.MF_q_mix_rc_m3day(qliq_sm3day,fw_perc,p_atma,t_c,str_PVT)
 
-    def calc_MF_rhomix_kgm3(self, qliq_sm3day,fw_perc,p_atma,t_C,str_PVT=""):
+    def calc_MF_rhomix_kgm3(self, qliq_sm3day,fw_perc,p_atma,t_c,str_PVT=""):
         """" расчет плотности газожидкостной смеси для заданных условий
         
                     qliq_sm3day- дебит жидкости на поверхности    
@@ -712,9 +712,9 @@ class API():
         """
 
         self.MF_rhomix_kgm3 = self.book.macro("MF_rhomix_kgm3")
-        return self.MF_rhomix_kgm3(qliq_sm3day,fw_perc,p_atma,t_C,str_PVT)
+        return self.MF_rhomix_kgm3(qliq_sm3day,fw_perc,p_atma,t_c,str_PVT)
 
-    def calc_MF_mu_mix_cP(self, qliq_sm3day,fw_perc,p_atma,t_C,str_PVT=""):
+    def calc_MF_mu_mix_cP(self, qliq_sm3day,fw_perc,p_atma,t_c,str_PVT=""):
         """" расчет вязкости газожидкостной смеси  для заданных термобарических условий
         
                     qliq_sm3day - дебит жидкости на поверхности    
@@ -730,9 +730,9 @@ class API():
         """
 
         self.MF_mu_mix_cP = self.book.macro("MF_mu_mix_cP")
-        return self.MF_mu_mix_cP(qliq_sm3day,fw_perc,p_atma,t_C,str_PVT)
+        return self.MF_mu_mix_cP(qliq_sm3day,fw_perc,p_atma,t_c,str_PVT)
 
-    def calc_MF_gas_fraction_d(self, p_atma,t_C,fw_perc=0,str_PVT=PVT_DEFAULT):
+    def calc_MF_gas_fraction_d(self, p_atma,t_c,fw_perc=0,str_PVT=PVT_DEFAULT):
         """" расчет доли газа в потоке
         
                     p_atma - давление, атм    
@@ -746,9 +746,9 @@ class API():
         """
 
         self.MF_gas_fraction_d = self.book.macro("MF_gas_fraction_d")
-        return self.MF_gas_fraction_d(p_atma,t_C,fw_perc,str_PVT)
+        return self.MF_gas_fraction_d(p_atma,t_c,fw_perc,str_PVT)
 
-    def calc_MF_p_gas_fraction_atma(self, FreeGas_d,t_C,fw_perc,str_PVT=PVT_DEFAULT):
+    def calc_MF_p_gas_fraction_atma(self, FreeGas_d,t_c,fw_perc,str_PVT=PVT_DEFAULT):
         """" расчет давления при котором  достигается заданная доля газа в потоке
         
                     freegas_d - допустимая доля газа в потоке;    
@@ -762,9 +762,9 @@ class API():
         """
 
         self.MF_p_gas_fraction_atma = self.book.macro("MF_p_gas_fraction_atma")
-        return self.MF_p_gas_fraction_atma(FreeGas_d,t_C,fw_perc,str_PVT)
+        return self.MF_p_gas_fraction_atma(FreeGas_d,t_c,fw_perc,str_PVT)
 
-    def calc_MF_rp_gas_fraction_m3m3(self, FreeGas_d,p_atma,t_C,fw_perc,str_PVT=PVT_DEFAULT):
+    def calc_MF_rp_gas_fraction_m3m3(self, FreeGas_d,p_atma,t_c,fw_perc,str_PVT=PVT_DEFAULT):
         """" расчет газового фактора  при котором достигается заданная доля газа в потоке
         
                     freegas_d - допустимая доля газа в потоке    
@@ -780,7 +780,7 @@ class API():
         """
 
         self.MF_rp_gas_fraction_m3m3 = self.book.macro("MF_rp_gas_fraction_m3m3")
-        return self.MF_rp_gas_fraction_m3m3(FreeGas_d,p_atma,t_C,fw_perc,str_PVT)
+        return self.MF_rp_gas_fraction_m3m3(FreeGas_d,p_atma,t_c,fw_perc,str_PVT)
 
     def calc_MF_ksep_natural_d(self, qliq_sm3day,fw_perc,p_intake_atma,t_intake_C=50,d_intake_mm=90,d_cas_mm=120,str_PVT=PVT_DEFAULT):
         """" расчет натуральной сепарации газа на приеме насоса
@@ -1636,7 +1636,7 @@ class API():
         self.motor_Pnom_kW = self.book.macro("motor_Pnom_kW")
         return self.motor_Pnom_kW(Unom_V,Inom_A,Fnom_Hz,motorID)
 
-    def calc_GLV_q_gas_sm3day(self, d_mm,p_in_atma,p_out_atma,gamma_g,t_C):
+    def calc_GLV_q_gas_sm3day(self, d_mm,p_in_atma,p_out_atma,gamma_g,t_c):
         """" функция расчета расхода газа через газлифтный клапан  с учетом наличия вкруток на выходе клапана  результат массив значений и подписей
         
                     d_mm - диаметр основного порта клапана, мм    
@@ -1652,9 +1652,9 @@ class API():
         """
 
         self.GLV_q_gas_sm3day = self.book.macro("GLV_q_gas_sm3day")
-        return self.GLV_q_gas_sm3day(d_mm,p_in_atma,p_out_atma,gamma_g,t_C)
+        return self.GLV_q_gas_sm3day(d_mm,p_in_atma,p_out_atma,gamma_g,t_c)
 
-    def calc_GLV_q_gas_vkr_sm3day(self, d_port_mm,d_vkr_mm,p_in_atma,p_out_atma,gamma_g,t_C):
+    def calc_GLV_q_gas_vkr_sm3day(self, d_port_mm,d_vkr_mm,p_in_atma,p_out_atma,gamma_g,t_c):
         """" функция расчета расхода газа через газлифтный клапан  с учетом наличия вкруток на выходе клапана.  результат массив значений и подписей.
         
                     d_port_mm - диаметр основного порта клапана, мм    
@@ -1672,9 +1672,9 @@ class API():
         """
 
         self.GLV_q_gas_vkr_sm3day = self.book.macro("GLV_q_gas_vkr_sm3day")
-        return self.GLV_q_gas_vkr_sm3day(d_port_mm,d_vkr_mm,p_in_atma,p_out_atma,gamma_g,t_C)
+        return self.GLV_q_gas_vkr_sm3day(d_port_mm,d_vkr_mm,p_in_atma,p_out_atma,gamma_g,t_c)
 
-    def calc_GLV_p_vkr_atma(self, d_port_mm,d_vkr_mm,p_calc_atma,q_gas_sm3day,gamma_g=0.6,t_C=25,calc_alog_flow=False):
+    def calc_GLV_p_vkr_atma(self, d_port_mm,d_vkr_mm,p_calc_atma,q_gas_sm3day,gamma_g=0.6,t_c=25,calc_alog_flow=False):
         """" функция расчета давления на входе или на выходе  газлифтного клапана (простого) при закачке газа.  результат массив значений и подписей
         
                     d_port_mm - диаметр порта клапана, мм    
@@ -1694,9 +1694,9 @@ class API():
         """
 
         self.GLV_p_vkr_atma = self.book.macro("GLV_p_vkr_atma")
-        return self.GLV_p_vkr_atma(d_port_mm,d_vkr_mm,p_calc_atma,q_gas_sm3day,gamma_g,t_C,calc_alog_flow)
+        return self.GLV_p_vkr_atma(d_port_mm,d_vkr_mm,p_calc_atma,q_gas_sm3day,gamma_g,t_c,calc_alog_flow)
 
-    def calc_GLV_p_atma(self, d_mm,p_calc_atma,q_gas_sm3day,gamma_g=0.6,t_C=25,calc_alog_flow=False,p_open_atma=0):
+    def calc_GLV_p_atma(self, d_mm,p_calc_atma,q_gas_sm3day,gamma_g=0.6,t_c=25,calc_alog_flow=False,p_open_atma=0):
         """" функция расчета давления на входе или на выходе  газлифтного клапана (простого) при закачке газа.  результат массив значений и подписей
         
                     d_mm - диаметр клапана, мм    
@@ -1716,9 +1716,9 @@ class API():
         """
 
         self.GLV_p_atma = self.book.macro("GLV_p_atma")
-        return self.GLV_p_atma(d_mm,p_calc_atma,q_gas_sm3day,gamma_g,t_C,calc_alog_flow,p_open_atma)
+        return self.GLV_p_atma(d_mm,p_calc_atma,q_gas_sm3day,gamma_g,t_c,calc_alog_flow,p_open_atma)
 
-    def calc_GLV_p_bellow_atma(self, p_atma,t_C):
+    def calc_GLV_p_bellow_atma(self, p_atma,t_c):
         """" функция расчета давления зарядки сильфона на стенде при  стандартной температуре по данным рабочих давления и температуры
         
                     p_atma - рабочее давление открытия клапана в скважине, атм    
@@ -1728,9 +1728,9 @@ class API():
         """
 
         self.GLV_p_bellow_atma = self.book.macro("GLV_p_bellow_atma")
-        return self.GLV_p_bellow_atma(p_atma,t_C)
+        return self.GLV_p_bellow_atma(p_atma,t_c)
 
-    def calc_GLV_p_close_atma(self, p_bellow_atm,t_C):
+    def calc_GLV_p_close_atma(self, p_bellow_atm,t_c):
         """" фукнция расчета давления в сильфоне с азотом  в рабочих условиях при заданной температуре
         
                     p_bellow_atm - давление зарядки сильфона при стандартных условиях    
@@ -1740,9 +1740,9 @@ class API():
         """
 
         self.GLV_p_close_atma = self.book.macro("GLV_p_close_atma")
-        return self.GLV_p_close_atma(p_bellow_atm,t_C)
+        return self.GLV_p_close_atma(p_bellow_atm,t_c)
 
-    def calc_GLV_d_choke_mm(self, q_gas_sm3day,p_in_atma,p_out_atma,gamma_g=0.6,t_C=25):
+    def calc_GLV_d_choke_mm(self, q_gas_sm3day,p_in_atma,p_out_atma,gamma_g=0.6,t_c=25):
         """"Функция расчета диаметра порта клапана на основе уравнения Thornhill-Crave
         
                     q_gas_sm3day - расход газа, ст. м3/сут    
@@ -1758,9 +1758,9 @@ class API():
         """
 
         self.GLV_d_choke_mm = self.book.macro("GLV_d_choke_mm")
-        return self.GLV_d_choke_mm(q_gas_sm3day,p_in_atma,p_out_atma,gamma_g,t_C)
+        return self.GLV_d_choke_mm(q_gas_sm3day,p_in_atma,p_out_atma,gamma_g,t_c)
 
-    def calc_GLV_IPO_p_open(self, p_bellow_atma,p_out_atma,t_C,d_port_mm,GLV_type=0,d_vkr1_mm=-1,d_vkr2_mm=-1,d_vkr3_mm=-1,d_vkr4_mm=-1):
+    def calc_GLV_IPO_p_open(self, p_bellow_atma,p_out_atma,t_c,d_port_mm,GLV_type=0,d_vkr1_mm=-1,d_vkr2_mm=-1,d_vkr3_mm=-1,d_vkr4_mm=-1):
         """"Функция расчета давления открытия газлифтного клапана R1
         
                     p_bellow_atma - давление зарядки сильфона на стенде, атма    
@@ -1784,9 +1784,9 @@ class API():
         """
 
         self.GLV_IPO_p_open = self.book.macro("GLV_IPO_p_open")
-        return self.GLV_IPO_p_open(p_bellow_atma,p_out_atma,t_C,d_port_mm,GLV_type,d_vkr1_mm,d_vkr2_mm,d_vkr3_mm,d_vkr4_mm)
+        return self.GLV_IPO_p_open(p_bellow_atma,p_out_atma,t_c,d_port_mm,GLV_type,d_vkr1_mm,d_vkr2_mm,d_vkr3_mm,d_vkr4_mm)
 
-    def calc_GLV_IPO_p_atma(self, p_bellow_atma,d_port_mm,p_calc_atma,q_gas_sm3day,t_C,calc_alog_flow=False,GLV_type=0,d_vkr1_mm=-1,d_vkr2_mm=-1,d_vkr3_mm=-1,d_vkr4_mm=-1):
+    def calc_GLV_IPO_p_atma(self, p_bellow_atma,d_port_mm,p_calc_atma,q_gas_sm3day,t_c,calc_alog_flow=False,GLV_type=0,d_vkr1_mm=-1,d_vkr2_mm=-1,d_vkr3_mm=-1,d_vkr4_mm=-1):
         """"Функция расчета давления открытия газлифтного клапана R1
         
                     p_bellow_atma - давление зарядки сильфона на стенде, атма  p_out_atma - давление на выходе клапана (нкт), атма    
@@ -1814,9 +1814,9 @@ class API():
         """
 
         self.GLV_IPO_p_atma = self.book.macro("GLV_IPO_p_atma")
-        return self.GLV_IPO_p_atma(p_bellow_atma,d_port_mm,p_calc_atma,q_gas_sm3day,t_C,calc_alog_flow,GLV_type,d_vkr1_mm,d_vkr2_mm,d_vkr3_mm,d_vkr4_mm)
+        return self.GLV_IPO_p_atma(p_bellow_atma,d_port_mm,p_calc_atma,q_gas_sm3day,t_c,calc_alog_flow,GLV_type,d_vkr1_mm,d_vkr2_mm,d_vkr3_mm,d_vkr4_mm)
 
-    def calc_GLV_IPO_p_close(self, p_bellow_atma,p_out_atma,t_C,d_port_mm,GLV_type=0,d_vkr1_mm=-1,d_vkr2_mm=-1,d_vkr3_mm=-1,d_vkr4_mm=-1):
+    def calc_GLV_IPO_p_close(self, p_bellow_atma,p_out_atma,t_c,d_port_mm,GLV_type=0,d_vkr1_mm=-1,d_vkr2_mm=-1,d_vkr3_mm=-1,d_vkr4_mm=-1):
         """"Функция расчета давления закрытия газлифтного клапана R1
         
                     p_bellow_atma - давление зарядки сильфона на стенде, атма    
@@ -1840,7 +1840,7 @@ class API():
         """
 
         self.GLV_IPO_p_close = self.book.macro("GLV_IPO_p_close")
-        return self.GLV_IPO_p_close(p_bellow_atma,p_out_atma,t_C,d_port_mm,GLV_type,d_vkr1_mm,d_vkr2_mm,d_vkr3_mm,d_vkr4_mm)
+        return self.GLV_IPO_p_close(p_bellow_atma,p_out_atma,t_c,d_port_mm,GLV_type,d_vkr1_mm,d_vkr2_mm,d_vkr3_mm,d_vkr4_mm)
 
     def calc_PVT_encode_string(self, gamma_gas=const_gg_,gamma_oil=const_go_,gamma_wat=const_gw_,rsb_m3m3=const_rsb_default,rp_m3m3=-1,pb_atma=-1,tres_C=const_tres_default,bob_m3m3=-1,muob_cP=-1,PVTcorr=Standing_based,ksep_fr=0,pksep_atma=-1,tksep_C=-1,gas_only=False):
         """" Функция кодирования параметров PVT в строку,  для передачи PVT свойств в прикладных пользовательских функциях.
@@ -1928,7 +1928,7 @@ class API():
         self.well_decode_string = self.book.macro("well_decode_string")
         return self.well_decode_string(str_well,getStr)
 
-    def calc_ESP_encode_string(self, esp_ID=1005,HeadNom_m=2000,ESPfreq_Hz=50,ESP_U_V=1000,MotorPowerNom_kW=30,t_intake_C=85,t_dis_C=85,KsepGS_fr=0,ESP_energy_fact_Whday=0,ESP_cable_type=0,ESP_Hmes_m=0,ESP_gas_degradation_type=0,c_calibr_head=0,c_calibr_rate=0,c_calibr_power=0,PKV_work_min=-1,PKV_stop_min=-1):
+    def calc_ESP_encode_string(self, esp_ID=1005,HeadNom_m=2000,ESPfreq_Hz=50,ESP_U_V=1000,MotorPowerNom_kW=30,t_intake_C=85,t_dis_C=85,KsepGS_fr=0,ESP_energy_fact_Whday=0,ESP_cable_type=0,ESP_Hmes_m=0,ESP_gas_degradation_type=0,c_calibr_head=0,c_calibr_rate=0,c_calibr_power=0,PKV_work_min=-1,PKV_stop_min=-1,cos_phi=-1):
         """" функция кодирования параметров работы УЭЦН в строку,  которую можно потом использовать для задания ЭЦН в прикладных функциях
         
                     esp_id - идентификатор насоса    
@@ -1963,12 +1963,14 @@ class API():
 
         pkv_work_min - время работы скважины для режима пкв в минутах    
 
-        pkv_stop_min - время ожидания запуска скважины для пкв , мин  пкв - периодическое кратковременное включение  если не заданы, то скважина в пдф  пдф - постоянно действующий ..см.мануал   )  
+        pkv_stop_min - время ожидания запуска скважины для пкв , мин  пкв - периодическое кратковременное включение  если не заданы, то скважина в пдф  пдф - постоянно действующий ..см.мануал   
+
+        cos_phi - коэффициент мощности, доли единиц vfm    )  
 
         """
 
         self.ESP_encode_string = self.book.macro("ESP_encode_string")
-        return self.ESP_encode_string(esp_ID,HeadNom_m,ESPfreq_Hz,ESP_U_V,MotorPowerNom_kW,t_intake_C,t_dis_C,KsepGS_fr,ESP_energy_fact_Whday,ESP_cable_type,ESP_Hmes_m,ESP_gas_degradation_type,c_calibr_head,c_calibr_rate,c_calibr_power,PKV_work_min,PKV_stop_min)
+        return self.ESP_encode_string(esp_ID,HeadNom_m,ESPfreq_Hz,ESP_U_V,MotorPowerNom_kW,t_intake_C,t_dis_C,KsepGS_fr,ESP_energy_fact_Whday,ESP_cable_type,ESP_Hmes_m,ESP_gas_degradation_type,c_calibr_head,c_calibr_rate,c_calibr_power,PKV_work_min,PKV_stop_min,cos_phi)
 
     def calc_ESP_decode_string(self, str_ESP,getStr=False):
         """" функция расшифровки параметров работы ЭЦН закодированных в строке
