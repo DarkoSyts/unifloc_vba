@@ -148,7 +148,7 @@ def mass_calculation(well_state, debug_print = False):
 
 
 
-start = datetime.datetime(2019,2,3)
+start = datetime.datetime(2019,2,2)
 end = datetime.datetime(2019,2,27)
 prepared_data = pd.read_csv("stuff_to_merge/input_data.csv")
 prepared_data.index = pd.to_datetime(prepared_data["Unnamed: 0"])
@@ -159,10 +159,13 @@ result_list = []
 result_dataframe = {'d':[2]}
 result_dataframe = pd.DataFrame(result_dataframe)
 start_time = time.time()
-#for i in range(prepared_data.shape[0]):
-for i in range(2):
+for i in range(prepared_data.shape[0]):
+#for i in range(2):
+
     start_in_loop_time = time.time()
     row_in_prepared_data = prepared_data.iloc[i]
+    print("Расчет для времени:")
+    print(prepared_data.index[i])
     this_state = all_ESP_data()
     this_state.qliq_m3day = row_in_prepared_data[' Объемный дебит жидкости']
     this_state.watercut_perc = row_in_prepared_data[' Процент обводненности']
@@ -190,9 +193,9 @@ for i in range(2):
         print(str(this_result[1][i]) + " -  " + str(this_result[0][i]))
     new_dataframe = pd.DataFrame(new_dict)
     result_dataframe = result_dataframe.append(new_dataframe, sort=False)
-
+    result_dataframe.to_csv("stuff_to_merge/check_result_12_09_2019_current_45.csv")
 
 end_time = time.time()
 print("Затрачено всего: " + str(end_time - start_time))
 
-result_dataframe.to_csv("stuff_to_merge/check_result_26_08_2019.csv")
+result_dataframe.to_csv("stuff_to_merge/check_result_12_09_2019_finished_45.csv")
