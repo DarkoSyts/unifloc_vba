@@ -3,6 +3,7 @@
 
 Кобзарь О.С Хабибуллин Р.А. 21.08.2019
 """
+calc_mark_str = "28_09_test"
 
 import description_generated.python_api as python_api
 from scipy.optimize import minimize
@@ -72,14 +73,18 @@ class all_ESP_data():
         self.result = None
 
 
-def mass_calculation(well_state, debug_print = False):
+def mass_calculation(well_state, debug_print = False, restore_flow = False):
     this_state = well_state
 
     def calc_well_plin_pwf_atma_for_fsolve(c_calibr_head_d):
-        c_calibr_power_d = c_calibr_head_d[1]
-        c_calibr_head_d = c_calibr_head_d[0]
-        c_calibr_rate_d = this_state.c_calibr_rate_d
+        #c_calibr_power_d = c_calibr_head_d[1]  #TODO изменить коэффициенты для восстановления дебита
+        #c_calibr_head_d = c_calibr_head_d[0]
+        #c_calibr_rate_d = this_state.c_calibr_rate_d
                #this_state.c_calibr_power_d
+        if restore_flow == False:
+            this_state.c_calibr_power_d = c_calibr_head_d[1]
+            this_state.c_calibr_head_d = c_calibr_head_d[0]
+            this_state.c_calibr_rate_d = this_state.c_calibr_rate_d
         PVTstr = UniflocVBA.calc_PVT_encode_string(this_state.gamma_gas, this_state.gamma_oil,
                                                    this_state.gamma_wat, this_state.rsb_m3m3, this_state.rp_m3m3,
                                                    this_state.pb_atm, this_state.tres_c,
@@ -102,16 +107,16 @@ def mass_calculation(well_state, debug_print = False):
                                                    t_dis_C = -1,
                                                    KsepGS_fr=this_state.KsepGS_fr,
                                                    ESP_Hmes_m=this_state.h_tube_m,
-                                                   c_calibr_head=c_calibr_head_d,
-                                                   c_calibr_rate=c_calibr_rate_d,
-                                                   c_calibr_power=c_calibr_power_d,
+                                                   c_calibr_head=this_state.c_calibr_head_d,
+                                                   c_calibr_rate=this_state.c_calibr_rate_d,
+                                                   c_calibr_power=this_state.c_calibr_power_d,
                                                    cos_phi=this_state.cos_phi_data_d)
         result = UniflocVBA.calc_well_plin_pwf_atma(this_state.qliq_m3day, this_state.watercut_perc,
                                                     this_state.p_wf_atm,
                                                     this_state.p_cas_data_atm, Wellstr,
                                                     PVTstr, ESPstr, this_state.hydr_corr,
-                                                    this_state.ksep_d, c_calibr_head_d, c_calibr_power_d,
-                                                    c_calibr_rate_d)
+                                                    this_state.ksep_d, this_state.c_calibr_head_d, this_state.c_calibr_power_d,
+                                                    this_state.c_calibr_rate_d)
 
 
 
@@ -146,56 +151,56 @@ def mass_calculation(well_state, debug_print = False):
     #for i in range(len(true_result[0])):
     #    print(str(true_result[1][i]) + " -  " + str(true_result[0][i]))
 
+calc_option = True
+if calc_option == True:
+    start = datetime.datetime(2019,2,2)
+    end = datetime.datetime(2019,2,27)
+    prepared_data = pd.read_csv("stuff_to_merge/input_data.csv")
+    prepared_data.index = pd.to_datetime(prepared_data["Unnamed: 0"])
+    prepared_data = prepared_data[(prepared_data.index > start) & (prepared_data.index < end)]
+    del prepared_data["Unnamed: 0"]
 
+    result_list = []
+    result_dataframe = {'d':[2]}
+    result_dataframe = pd.DataFrame(result_dataframe)
+    start_time = time.time()
+    #for i in range(prepared_data.shape[0]):
+    for i in range(2): # TODO изменить названия колонок
 
-start = datetime.datetime(2019,2,2)
-end = datetime.datetime(2019,2,27)
-prepared_data = pd.read_csv("stuff_to_merge/input_data.csv")
-prepared_data.index = pd.to_datetime(prepared_data["Unnamed: 0"])
-prepared_data = prepared_data[(prepared_data.index > start) & (prepared_data.index < end)]
-del prepared_data["Unnamed: 0"]
+        start_in_loop_time = time.time()
+        row_in_prepared_data = prepared_data.iloc[i]
+        print("Расчет для времени:")
+        print(prepared_data.index[i])
+        this_state = all_ESP_data()
+        this_state.qliq_m3day = row_in_prepared_data[' Объемный дебит жидкости']
+        this_state.watercut_perc = row_in_prepared_data[' Процент обводненности']
+        this_state.rp_m3m3 = row_in_prepared_data['ГФ']
 
-result_list = []
-result_dataframe = {'d':[2]}
-result_dataframe = pd.DataFrame(result_dataframe)
-start_time = time.time()
-for i in range(prepared_data.shape[0]):
-#for i in range(2):
+        this_state.p_buf_data_atm = row_in_prepared_data['Рбуф']
+        this_state.p_wellhead_data_atm = row_in_prepared_data['Рлин ТМ']
 
-    start_in_loop_time = time.time()
-    row_in_prepared_data = prepared_data.iloc[i]
-    print("Расчет для времени:")
-    print(prepared_data.index[i])
-    this_state = all_ESP_data()
-    this_state.qliq_m3day = row_in_prepared_data[' Объемный дебит жидкости']
-    this_state.watercut_perc = row_in_prepared_data[' Процент обводненности']
-    this_state.rp_m3m3 = row_in_prepared_data['ГФ']
+        this_state.tsep_c = row_in_prepared_data[' Температура на приеме насоса (пласт. жидкость)']
+        this_state.tres_c = 16
+        this_state.p_intake_data_atm = row_in_prepared_data[' Давление на приеме насоса (пласт. жидкость)'] * 10
+        this_state.psep_atm = row_in_prepared_data[' Давление на приеме насоса (пласт. жидкость)'] * 10
+        this_state.p_wf_atm = row_in_prepared_data[' Давление на приеме насоса (пласт. жидкость)'] * 10
 
-    this_state.p_buf_data_atm = row_in_prepared_data['Рбуф']
-    this_state.p_wellhead_data_atm = row_in_prepared_data['Рлин ТМ']
+        this_state.active_power_cs_data_kwt = row_in_prepared_data[' Активная мощность'] * 1000
+        this_state.u_motor_data_v = row_in_prepared_data[' Напряжение на выходе ТМПН']
+        this_state.cos_phi_data_d = row_in_prepared_data[' Коэффициент мощности']
+        this_result = mass_calculation(this_state, True)
+        result_list.append(this_result)
+        end_in_loop_time = time.time()
+        print("Затрачено времени в итерации: " + str(i) + " - " + str(end_in_loop_time - start_in_loop_time))
+        new_dict = {}
+        for i in range(len(this_result[1])):
+            new_dict[this_result[1][i]] = [this_result[0][i]]
+            print(str(this_result[1][i]) + " -  " + str(this_result[0][i]))
+        new_dataframe = pd.DataFrame(new_dict)
+        result_dataframe = result_dataframe.append(new_dataframe, sort=False)
+        result_dataframe.to_csv("stuff_to_merge/" + calc_mark_str + "_current.csv")
 
-    this_state.tsep_c = row_in_prepared_data[' Температура на приеме насоса (пласт. жидкость)']
-    this_state.tres_c = 16
-    this_state.p_intake_data_atm = row_in_prepared_data[' Давление на приеме насоса (пласт. жидкость)'] * 10
-    this_state.psep_atm = row_in_prepared_data[' Давление на приеме насоса (пласт. жидкость)'] * 10
-    this_state.p_wf_atm = row_in_prepared_data[' Давление на приеме насоса (пласт. жидкость)'] * 10
+    end_time = time.time()
+    print("Затрачено всего: " + str(end_time - start_time))
 
-    this_state.active_power_cs_data_kwt = row_in_prepared_data[' Активная мощность'] * 1000
-    this_state.u_motor_data_v = row_in_prepared_data[' Напряжение на выходе ТМПН']
-    this_state.cos_phi_data_d = row_in_prepared_data[' Коэффициент мощности']
-    this_result = mass_calculation(this_state, True)
-    result_list.append(this_result)
-    end_in_loop_time = time.time()
-    print("Затрачено времени в итерации: " + str(i) + " - " + str(end_in_loop_time - start_in_loop_time))
-    new_dict = {}
-    for i in range(len(this_result[1])):
-        new_dict[this_result[1][i]] = [this_result[0][i]]
-        print(str(this_result[1][i]) + " -  " + str(this_result[0][i]))
-    new_dataframe = pd.DataFrame(new_dict)
-    result_dataframe = result_dataframe.append(new_dataframe, sort=False)
-    result_dataframe.to_csv("stuff_to_merge/check_result_12_09_2019_current_45.csv")
-
-end_time = time.time()
-print("Затрачено всего: " + str(end_time - start_time))
-
-result_dataframe.to_csv("stuff_to_merge/check_result_12_09_2019_finished_45.csv")
+    result_dataframe.to_csv("stuff_to_merge/" + calc_mark_str + "_finished.csv")
