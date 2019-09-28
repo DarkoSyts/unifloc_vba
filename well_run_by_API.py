@@ -3,7 +3,7 @@
 
 Кобзарь О.С Хабибуллин Р.А. 21.08.2019
 """
-calc_mark_str = "28_09_test"
+calc_mark_str = "28_09_test_vfm_2"
 
 import description_generated.python_api as python_api
 from scipy.optimize import minimize
@@ -75,14 +75,15 @@ class all_ESP_data():
 
 def mass_calculation(well_state, debug_print = False, restore_flow = False):
     this_state = well_state
-
-    def calc_well_plin_pwf_atma_for_fsolve(c_calibr_head_d):
+    print('privet!!!')
+    def calc_well_plin_pwf_atma_for_fsolve(minimaze_parameters):
         if restore_flow == False: #TODO изменить коэффициенты для восстановления дебита
-            this_state.c_calibr_power_d = c_calibr_head_d[1]
-            this_state.c_calibr_head_d = c_calibr_head_d[0]
+            this_state.c_calibr_power_d = minimaze_parameters[1]
+            this_state.c_calibr_head_d = minimaze_parameters[0]
             this_state.c_calibr_rate_d = this_state.c_calibr_rate_d
         else:
-            pass
+            this_state.qliq_m3day = minimaze_parameters[0]
+            this_state.rp_m3m3 = minimaze_parameters[1]
         PVTstr = UniflocVBA.calc_PVT_encode_string(this_state.gamma_gas, this_state.gamma_oil,
                                                    this_state.gamma_wat, this_state.rsb_m3m3, this_state.rp_m3m3,
                                                    this_state.pb_atm, this_state.tres_c,
@@ -136,7 +137,10 @@ def mass_calculation(well_state, debug_print = False, restore_flow = False):
             print("active_power_cs_data_kwt = " + str(this_state.active_power_cs_data_kwt))
             print("ошибка на текущем шаге = " + str(result_for_folve))
         return result_for_folve
-    result = minimize(calc_well_plin_pwf_atma_for_fsolve, [0.5, 0.5], bounds=[[0, 20], [0, 20]])
+    if restore_flow == False:
+        result = minimize(calc_well_plin_pwf_atma_for_fsolve, [0.5, 0.5], bounds=[[0, 20], [0, 20]])
+    else:
+        result = minimize(calc_well_plin_pwf_atma_for_fsolve, [100, 30], bounds=[[1, 145], [1, 40]])
 
     print(result)
     #print(result.x[0])
@@ -159,7 +163,7 @@ if calc_option == True:
     result_dataframe = pd.DataFrame(result_dataframe)
     start_time = time.time()
     #for i in range(prepared_data.shape[0]):
-    for i in range(2): # TODO изменить названия колонок
+    for i in range(112):
 
         start_in_loop_time = time.time()
         row_in_prepared_data = prepared_data.iloc[i]
@@ -182,15 +186,21 @@ if calc_option == True:
         this_state.active_power_cs_data_kwt = row_in_prepared_data['Активная мощность (СУ)'] * 1000
         this_state.u_motor_data_v = row_in_prepared_data['Напряжение на выходе ТМПН (СУ)']
         this_state.cos_phi_data_d = row_in_prepared_data['Коэффициент мощности (СУ)']
-        this_result = mass_calculation(this_state, True)
+        this_state.c_calibr_rate_d = 1
+        this_state.c_calibr_head_d = row_in_prepared_data["Коэффициент калибровки по напору - множитель (Модель, вход)"]
+        this_state.c_calibr_power_d = row_in_prepared_data["Коэффициент калибровки по мощности - множитель (Модель, вход)"]
+        this_result = mass_calculation(this_state, True, True)
         result_list.append(this_result)
         end_in_loop_time = time.time()
         print("Затрачено времени в итерации: " + str(i) + " - " + str(end_in_loop_time - start_in_loop_time))
         new_dict = {}
-        for i in range(len(this_result[1])):
-            new_dict[this_result[1][i]] = [this_result[0][i]]
-            print(str(this_result[1][i]) + " -  " + str(this_result[0][i]))
+        for j in range(len(this_result[1])):
+            new_dict[this_result[1][j]] = [this_result[0][j]]
+            print(str(this_result[1][j]) + " -  " + str(this_result[0][j]))
+        
+        new_dict['Time'] = [prepared_data.index[i]]
         new_dataframe = pd.DataFrame(new_dict)
+        new_dataframe.index = new_dataframe['Time']
         result_dataframe = result_dataframe.append(new_dataframe, sort=False)
         result_dataframe.to_csv("stuff_to_merge/" + calc_mark_str + "_current.csv")
 
