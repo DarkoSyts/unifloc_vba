@@ -77,14 +77,12 @@ def mass_calculation(well_state, debug_print = False, restore_flow = False):
     this_state = well_state
 
     def calc_well_plin_pwf_atma_for_fsolve(c_calibr_head_d):
-        #c_calibr_power_d = c_calibr_head_d[1]  #TODO изменить коэффициенты для восстановления дебита
-        #c_calibr_head_d = c_calibr_head_d[0]
-        #c_calibr_rate_d = this_state.c_calibr_rate_d
-               #this_state.c_calibr_power_d
-        if restore_flow == False:
+        if restore_flow == False: #TODO изменить коэффициенты для восстановления дебита
             this_state.c_calibr_power_d = c_calibr_head_d[1]
             this_state.c_calibr_head_d = c_calibr_head_d[0]
             this_state.c_calibr_rate_d = this_state.c_calibr_rate_d
+        else:
+            pass
         PVTstr = UniflocVBA.calc_PVT_encode_string(this_state.gamma_gas, this_state.gamma_oil,
                                                    this_state.gamma_wat, this_state.rsb_m3m3, this_state.rp_m3m3,
                                                    this_state.pb_atm, this_state.tres_c,
@@ -122,10 +120,6 @@ def mass_calculation(well_state, debug_print = False, restore_flow = False):
 
         this_state.result = result
 
-        """p_buf_calc_atm = result[0][2]
-        result_for_folve = (p_buf_calc_atm - this_state.p_buf_data_atm) ** 2
-        print(p_buf_calc_atm)"""
-
         #print(this_state.result)
         p_wellhead_calc_atm = result[0][0]
         p_buf_calc_atm = result[0][2]
@@ -155,7 +149,7 @@ calc_option = True
 if calc_option == True:
     start = datetime.datetime(2019,2,2)
     end = datetime.datetime(2019,2,27)
-    prepared_data = pd.read_csv("stuff_to_merge/input_data.csv")
+    prepared_data = pd.read_csv("stuff_to_merge/new_input_data.csv")
     prepared_data.index = pd.to_datetime(prepared_data["Unnamed: 0"])
     prepared_data = prepared_data[(prepared_data.index > start) & (prepared_data.index < end)]
     del prepared_data["Unnamed: 0"]
@@ -172,22 +166,22 @@ if calc_option == True:
         print("Расчет для времени:")
         print(prepared_data.index[i])
         this_state = all_ESP_data()
-        this_state.qliq_m3day = row_in_prepared_data[' Объемный дебит жидкости']
-        this_state.watercut_perc = row_in_prepared_data[' Процент обводненности']
-        this_state.rp_m3m3 = row_in_prepared_data['ГФ']
+        this_state.qliq_m3day = row_in_prepared_data['Объемный дебит жидкости (СУ)']
+        this_state.watercut_perc = row_in_prepared_data['Процент обводненности (СУ)']
+        this_state.rp_m3m3 = row_in_prepared_data['ГФ (СУ)']
 
-        this_state.p_buf_data_atm = row_in_prepared_data['Рбуф']
-        this_state.p_wellhead_data_atm = row_in_prepared_data['Рлин ТМ']
+        this_state.p_buf_data_atm = row_in_prepared_data['Рбуф (Ш)']
+        this_state.p_wellhead_data_atm = row_in_prepared_data['Рлин ТМ (Ш)']
 
-        this_state.tsep_c = row_in_prepared_data[' Температура на приеме насоса (пласт. жидкость)']
+        this_state.tsep_c = row_in_prepared_data['Температура на приеме насоса (пласт. жидкость) (СУ)']
         this_state.tres_c = 16
-        this_state.p_intake_data_atm = row_in_prepared_data[' Давление на приеме насоса (пласт. жидкость)'] * 10
-        this_state.psep_atm = row_in_prepared_data[' Давление на приеме насоса (пласт. жидкость)'] * 10
-        this_state.p_wf_atm = row_in_prepared_data[' Давление на приеме насоса (пласт. жидкость)'] * 10
+        this_state.p_intake_data_atm = row_in_prepared_data['Давление на приеме насоса (пласт. жидкость) (СУ)'] * 10
+        this_state.psep_atm = row_in_prepared_data['Давление на приеме насоса (пласт. жидкость) (СУ)'] * 10
+        this_state.p_wf_atm = row_in_prepared_data['Давление на приеме насоса (пласт. жидкость) (СУ)'] * 10
 
-        this_state.active_power_cs_data_kwt = row_in_prepared_data[' Активная мощность'] * 1000
-        this_state.u_motor_data_v = row_in_prepared_data[' Напряжение на выходе ТМПН']
-        this_state.cos_phi_data_d = row_in_prepared_data[' Коэффициент мощности']
+        this_state.active_power_cs_data_kwt = row_in_prepared_data['Активная мощность (СУ)'] * 1000
+        this_state.u_motor_data_v = row_in_prepared_data['Напряжение на выходе ТМПН (СУ)']
+        this_state.cos_phi_data_d = row_in_prepared_data['Коэффициент мощности (СУ)']
         this_result = mass_calculation(this_state, True)
         result_list.append(this_result)
         end_in_loop_time = time.time()

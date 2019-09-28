@@ -3,7 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="b3dcb58b-4a34-49e0-be72-204b8b23e2b7" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/stuff_to_merge/data_viewer.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/stuff_to_merge/data_viewer.ipynb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/well_run_by_API.py" beforeDir="false" afterPath="$PROJECT_DIR$/well_run_by_API.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -208,7 +207,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/well_run_by_API.py</url>
-          <line>179</line>
+          <line>173</line>
           <option name="timeStamp" value="15" />
         </line-breakpoint>
       </breakpoints>
