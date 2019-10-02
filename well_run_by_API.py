@@ -3,7 +3,7 @@
 
 Кобзарь О.С Хабибуллин Р.А. 21.08.2019
 """
-calc_mark_str = "28_09_test_vfm_2"
+calc_mark_str = "28_09_test_vfm_6_qliq_wc_all_days_02_08"
 
 import description_generated.python_api as python_api
 from scipy.optimize import minimize
@@ -71,19 +71,25 @@ class all_ESP_data():
         self.c_calibr_power_d = 1
         self.hydr_corr = 1 # 0 - BB, 1 - Ansari
         self.result = None
+        self.error_in_step = None
 
 
 def mass_calculation(well_state, debug_print = False, restore_flow = False):
     this_state = well_state
-    print('privet!!!')
     def calc_well_plin_pwf_atma_for_fsolve(minimaze_parameters):
         if restore_flow == False: #TODO изменить коэффициенты для восстановления дебита
             this_state.c_calibr_power_d = minimaze_parameters[1]
             this_state.c_calibr_head_d = minimaze_parameters[0]
             this_state.c_calibr_rate_d = this_state.c_calibr_rate_d
+            if debug_print:
+                print('c_calibr_power_d = ' + str(this_state.c_calibr_power_d))
+                print('c_calibr_head_d = ' + str(this_state.c_calibr_head_d))
         else:
             this_state.qliq_m3day = minimaze_parameters[0]
-            this_state.rp_m3m3 = minimaze_parameters[1]
+            this_state.watercut_perc = minimaze_parameters[1]
+            if debug_print:
+                print('qliq_m3day = ' + str(this_state.qliq_m3day))
+                print('watercut_perc = ' + str(this_state.watercut_perc))
         PVTstr = UniflocVBA.calc_PVT_encode_string(this_state.gamma_gas, this_state.gamma_oil,
                                                    this_state.gamma_wat, this_state.rsb_m3m3, this_state.rp_m3m3,
                                                    this_state.pb_atm, this_state.tres_c,
@@ -136,11 +142,12 @@ def mass_calculation(well_state, debug_print = False, restore_flow = False):
             print("power_CS_calc_W = " + str(power_CS_calc_W))
             print("active_power_cs_data_kwt = " + str(this_state.active_power_cs_data_kwt))
             print("ошибка на текущем шаге = " + str(result_for_folve))
+        this_state.error_in_step = result_for_folve
         return result_for_folve
     if restore_flow == False:
         result = minimize(calc_well_plin_pwf_atma_for_fsolve, [0.5, 0.5], bounds=[[0, 20], [0, 20]])
     else:
-        result = minimize(calc_well_plin_pwf_atma_for_fsolve, [100, 30], bounds=[[1, 145], [1, 40]])
+        result = minimize(calc_well_plin_pwf_atma_for_fsolve, [100, 20], bounds=[[1, 150], [10, 35]])
 
     print(result)
     #print(result.x[0])
@@ -150,8 +157,10 @@ def mass_calculation(well_state, debug_print = False, restore_flow = False):
     #    print(str(true_result[1][i]) + " -  " + str(true_result[0][i]))
 
 calc_option = True
+debug_mode = False
+vfm_calc_option = True
 if calc_option == True:
-    start = datetime.datetime(2019,2,2)
+    start = datetime.datetime(2019,2,8)
     end = datetime.datetime(2019,2,27)
     prepared_data = pd.read_csv("stuff_to_merge/new_input_data.csv")
     prepared_data.index = pd.to_datetime(prepared_data["Unnamed: 0"])
@@ -162,8 +171,8 @@ if calc_option == True:
     result_dataframe = {'d':[2]}
     result_dataframe = pd.DataFrame(result_dataframe)
     start_time = time.time()
-    #for i in range(prepared_data.shape[0]):
-    for i in range(112):
+    for i in range(prepared_data.shape[0]):
+    #for i in range(1):
 
         start_in_loop_time = time.time()
         row_in_prepared_data = prepared_data.iloc[i]
@@ -189,7 +198,7 @@ if calc_option == True:
         this_state.c_calibr_rate_d = 1
         this_state.c_calibr_head_d = row_in_prepared_data["Коэффициент калибровки по напору - множитель (Модель, вход)"]
         this_state.c_calibr_power_d = row_in_prepared_data["Коэффициент калибровки по мощности - множитель (Модель, вход)"]
-        this_result = mass_calculation(this_state, True, True)
+        this_result = mass_calculation(this_state, debug_mode, vfm_calc_option)
         result_list.append(this_result)
         end_in_loop_time = time.time()
         print("Затрачено времени в итерации: " + str(i) + " - " + str(end_in_loop_time - start_in_loop_time))
@@ -197,7 +206,8 @@ if calc_option == True:
         for j in range(len(this_result[1])):
             new_dict[this_result[1][j]] = [this_result[0][j]]
             print(str(this_result[1][j]) + " -  " + str(this_result[0][j]))
-        
+        new_dict['ГФ (модель, вход)'] = [this_state.rp_m3m3]
+        new_dict['Значение функции ошибки'] = [this_state.error_in_step]
         new_dict['Time'] = [prepared_data.index[i]]
         new_dataframe = pd.DataFrame(new_dict)
         new_dataframe.index = new_dataframe['Time']
