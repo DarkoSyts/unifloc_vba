@@ -3,7 +3,7 @@
 
 Кобзарь О.С Хабибуллин Р.А. 21.08.2019
 """
-calc_mark_str = "1354_big_run_2"
+calc_mark_str = "1354_big_run_3"
 # TODO отрефакторить
 # TODO перепад давления в насосе
 # TODO сразу ошибка для определения дебита на фактических точках
@@ -18,9 +18,10 @@ import pandas as pd
 UniflocVBA = python_api.API("UniflocVBA_7.xlam")
 import time
 import sys
+import xlwings as xw
 sys.path.append("../")
 import datetime
-
+import time
 
 class all_ESP_data():
     def __init__(self):
@@ -152,7 +153,7 @@ def mass_calculation(well_state, debug_print = False, restore_flow = False):
         this_state.error_in_step = result_for_folve
         return result_for_folve
     if restore_flow == False:
-        result = minimize(calc_well_plin_pwf_atma_for_fsolve, [0.5, 1.5], bounds=[[0, 20], [0, 20]])
+        result = minimize(calc_well_plin_pwf_atma_for_fsolve, [0.5, 0.5], bounds=[[0, 20], [0, 20]])
     else:
         result = minimize(calc_well_plin_pwf_atma_for_fsolve, [100, 20], bounds=[[1, 150], [10, 35]])
 
@@ -167,7 +168,7 @@ calc_option = True
 debug_mode = True
 vfm_calc_option = False
 if calc_option == True:
-    start = datetime.datetime(2019,1,28)
+    start = datetime.datetime(2018,8,18)
     end = datetime.datetime(2020,2,27)
     prepared_data = pd.read_csv("stuff_to_merge/1354 _input_data.csv")
     prepared_data.index = pd.to_datetime(prepared_data["Unnamed: 0"])
@@ -178,9 +179,17 @@ if calc_option == True:
     result_dataframe = {'d':[2]}
     result_dataframe = pd.DataFrame(result_dataframe)
     start_time = time.time()
-    for i in range(prepared_data.shape[0]):
-    #for i in range(1):
-
+    #for i in range(prepared_data.shape[0]):
+    for i in range(3):
+        check = i % 1
+        if check == 0 and i != 0:
+            print('Перезапуск Excel и VBA')
+            #UniflocVBA.book.close()
+            #UniflocVBA.book.macro('Application.Quit')
+            close_f = UniflocVBA.book.macro('close_book_by_macro')
+            close_f()
+            time.sleep(5)
+            UniflocVBA.book = xw.Book("UniflocVBA_7.xlam")
         start_in_loop_time = time.time()
         row_in_prepared_data = prepared_data.iloc[i]
         print("Расчет для времени:")
@@ -205,8 +214,9 @@ if calc_option == True:
         this_state.u_motor_data_v = row_in_prepared_data['Напряжение на выходе ТМПН (СУ)']
         this_state.cos_phi_data_d = row_in_prepared_data['Коэффициент мощности (СУ)']
         this_state.c_calibr_rate_d = 1
-        #this_state.c_calibr_head_d = row_in_prepared_data["Коэффициент калибровки по напору - множитель (Модель, вход)"]
-        #this_state.c_calibr_power_d = row_in_prepared_data["Коэффициент калибровки по мощности - множитель (Модель, вход)"]
+        if vfm_calc_option == True:
+            this_state.c_calibr_head_d = row_in_prepared_data["Коэффициент калибровки по напору - множитель (Модель, вход)"]
+            this_state.c_calibr_power_d = row_in_prepared_data["Коэффициент калибровки по мощности - множитель (Модель, вход)"]
         this_result = mass_calculation(this_state, debug_mode, vfm_calc_option)
         result_list.append(this_result)
         end_in_loop_time = time.time()
