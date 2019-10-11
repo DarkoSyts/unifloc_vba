@@ -3,8 +3,15 @@
 
 Кобзарь О.С Хабибуллин Р.А. 21.08.2019
 """
-calc_mark_str = "28_09_test_vfm_6_qliq_wc_all_days_02_08"
-
+calc_mark_str = "1354_big_run_2"
+# TODO отрефакторить
+# TODO перепад давления в насосе
+# TODO сразу ошибка для определения дебита на фактических точках
+# TODO интеграл
+# TODO произведение калибровок
+# TODO поверхность решения
+# TODO принять ГФ газосодержанию?
+# TODO изменение функции ошибки (деление на максимум, добавление линейного давления, добавления штуцера с другой стороны)
 import description_generated.python_api as python_api
 from scipy.optimize import minimize
 import pandas as pd
@@ -145,7 +152,7 @@ def mass_calculation(well_state, debug_print = False, restore_flow = False):
         this_state.error_in_step = result_for_folve
         return result_for_folve
     if restore_flow == False:
-        result = minimize(calc_well_plin_pwf_atma_for_fsolve, [0.5, 0.5], bounds=[[0, 20], [0, 20]])
+        result = minimize(calc_well_plin_pwf_atma_for_fsolve, [0.5, 1.5], bounds=[[0, 20], [0, 20]])
     else:
         result = minimize(calc_well_plin_pwf_atma_for_fsolve, [100, 20], bounds=[[1, 150], [10, 35]])
 
@@ -157,14 +164,14 @@ def mass_calculation(well_state, debug_print = False, restore_flow = False):
     #    print(str(true_result[1][i]) + " -  " + str(true_result[0][i]))
 
 calc_option = True
-debug_mode = False
-vfm_calc_option = True
+debug_mode = True
+vfm_calc_option = False
 if calc_option == True:
-    start = datetime.datetime(2019,2,8)
-    end = datetime.datetime(2019,2,27)
-    prepared_data = pd.read_csv("stuff_to_merge/new_input_data.csv")
+    start = datetime.datetime(2019,1,28)
+    end = datetime.datetime(2020,2,27)
+    prepared_data = pd.read_csv("stuff_to_merge/1354 _input_data.csv")
     prepared_data.index = pd.to_datetime(prepared_data["Unnamed: 0"])
-    prepared_data = prepared_data[(prepared_data.index > start) & (prepared_data.index < end)]
+    prepared_data = prepared_data[(prepared_data.index >= start) & (prepared_data.index < end)]
     del prepared_data["Unnamed: 0"]
 
     result_list = []
@@ -192,12 +199,14 @@ if calc_option == True:
         this_state.psep_atm = row_in_prepared_data['Давление на приеме насоса (пласт. жидкость) (СУ)'] * 10
         this_state.p_wf_atm = row_in_prepared_data['Давление на приеме насоса (пласт. жидкость) (СУ)'] * 10
 
+        this_state.d_choke_mm =  row_in_prepared_data['Dшт (Ш)']
+
         this_state.active_power_cs_data_kwt = row_in_prepared_data['Активная мощность (СУ)'] * 1000
         this_state.u_motor_data_v = row_in_prepared_data['Напряжение на выходе ТМПН (СУ)']
         this_state.cos_phi_data_d = row_in_prepared_data['Коэффициент мощности (СУ)']
         this_state.c_calibr_rate_d = 1
-        this_state.c_calibr_head_d = row_in_prepared_data["Коэффициент калибровки по напору - множитель (Модель, вход)"]
-        this_state.c_calibr_power_d = row_in_prepared_data["Коэффициент калибровки по мощности - множитель (Модель, вход)"]
+        #this_state.c_calibr_head_d = row_in_prepared_data["Коэффициент калибровки по напору - множитель (Модель, вход)"]
+        #this_state.c_calibr_power_d = row_in_prepared_data["Коэффициент калибровки по мощности - множитель (Модель, вход)"]
         this_result = mass_calculation(this_state, debug_mode, vfm_calc_option)
         result_list.append(this_result)
         end_in_loop_time = time.time()
