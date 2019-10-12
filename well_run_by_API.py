@@ -3,7 +3,7 @@
 
 Кобзарь О.С Хабибуллин Р.А. 21.08.2019
 """
-calc_mark_str = "1354_big_run_3"
+calc_mark_str = "1354_big_run_5"
 # TODO отрефакторить
 # TODO перепад давления в насосе
 # TODO сразу ошибка для определения дебита на фактических точках
@@ -16,7 +16,6 @@ import description_generated.python_api as python_api
 from scipy.optimize import minimize
 import pandas as pd
 UniflocVBA = python_api.API("UniflocVBA_7.xlam")
-import time
 import sys
 import xlwings as xw
 sys.path.append("../")
@@ -70,7 +69,7 @@ class all_ESP_data():
         self.p_buf_data_atm = 27
         self.h_perf_m = 831
         self.h_pump_m = 830
-        self.udl_m = 0
+        self.udl_m = 72
 
         self.ksep_d = 0.7
         self.KsepGS_fr = 0.7
@@ -172,20 +171,18 @@ if calc_option == True:
     end = datetime.datetime(2020,2,27)
     prepared_data = pd.read_csv("stuff_to_merge/1354 _input_data.csv")
     prepared_data.index = pd.to_datetime(prepared_data["Unnamed: 0"])
-    prepared_data = prepared_data[(prepared_data.index >= start) & (prepared_data.index < end)]
+    prepared_data = prepared_data[(prepared_data.index >= start) & (prepared_data.index <= end)]
     del prepared_data["Unnamed: 0"]
 
     result_list = []
     result_dataframe = {'d':[2]}
     result_dataframe = pd.DataFrame(result_dataframe)
     start_time = time.time()
-    #for i in range(prepared_data.shape[0]):
-    for i in range(3):
-        check = i % 1
+    for i in range(prepared_data.shape[0]):
+    #for i in range(3):
+        check = i % 150
         if check == 0 and i != 0:
             print('Перезапуск Excel и VBA')
-            #UniflocVBA.book.close()
-            #UniflocVBA.book.macro('Application.Quit')
             close_f = UniflocVBA.book.macro('close_book_by_macro')
             close_f()
             time.sleep(5)
@@ -194,6 +191,7 @@ if calc_option == True:
         row_in_prepared_data = prepared_data.iloc[i]
         print("Расчет для времени:")
         print(prepared_data.index[i])
+        print('Итерация № ' + str(i) + ' из ' + str(prepared_data.shape[0]))
         this_state = all_ESP_data()
         this_state.qliq_m3day = row_in_prepared_data['Объемный дебит жидкости (СУ)']
         this_state.watercut_perc = row_in_prepared_data['Процент обводненности (СУ)']
@@ -237,3 +235,5 @@ if calc_option == True:
     print("Затрачено всего: " + str(end_time - start_time))
 
     result_dataframe.to_csv("stuff_to_merge/" + calc_mark_str + "_finished.csv")
+close_f = UniflocVBA.book.macro('close_book_by_macro')
+close_f()
