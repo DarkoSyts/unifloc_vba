@@ -180,11 +180,12 @@ if calc_option == True:
     start_time = time.time()
     for i in range(prepared_data.shape[0]):
     #for i in range(3):
-        check = i % 150
+        check = i % 2
         if check == 0 and i != 0:
             print('Перезапуск Excel и VBA')
-            close_f = UniflocVBA.book.macro('close_book_by_macro')
-            close_f()
+            #close_f = UniflocVBA.book.macro('close_book_by_macro')
+            #close_f()
+            UniflocVBA.book.close()
             time.sleep(5)
             UniflocVBA.book = xw.Book("UniflocVBA_7.xlam")
         start_in_loop_time = time.time()
