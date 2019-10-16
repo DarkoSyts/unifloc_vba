@@ -3,7 +3,7 @@
 
 Кобзарь О.С Хабибуллин Р.А. 21.08.2019
 """
-calc_mark_str = "252_big_run_2"
+calc_mark_str = "569_big_run_5"
 # TODO отрефакторить
 # TODO перепад давления в насосе
 # TODO сразу ошибка для определения дебита на фактических точках
@@ -25,7 +25,7 @@ import time
 
 class all_ESP_data():
     def __init__(self):
-        self.esp_id = UniflocVBA.calc_ESP_id_by_rate(200)
+        self.esp_id = UniflocVBA.calc_ESP_id_by_rate(500)
         self.gamma_oil = 0.945
         self.gamma_gas = 0.9
         self.gamma_wat = 1.011
@@ -38,13 +38,13 @@ class all_ESP_data():
         self.psep_atm = 30
         self.tsep_c = 30
 
-        self.d_choke_mm = 18
+        self.d_choke_mm = 32
         self.dcas_mm = 160
-        self.h_tube_m = 811
-        self.d_tube_mm = 61
+        self.h_tube_m = 827
+        self.d_tube_mm = 76
 
         self.Power_motor_nom_kWt = 80
-        self.ESP_head_nom = 1450
+        self.ESP_head_nom = 1000
         self.ESP_rate_nom = None
         self.ESP_freq = None
 
@@ -57,8 +57,8 @@ class all_ESP_data():
         self.p_cas_data_atm = -1  # нет расчета затрубного пространства
 
         self.eff_motor_d = 0.89
-        self.i_motor_nom_a = 44.2
-        self.power_motor_nom_kwt = 80
+        self.i_motor_nom_a = 59.5
+        self.power_motor_nom_kwt = 180
         self.i_motor_data_a = None
         self.cos_phi_data_d = None
         self.load_motor_data_d = None
@@ -68,9 +68,9 @@ class all_ESP_data():
         self.qliq_m3day = None
         self.watercut_perc = None
         self.p_buf_data_atm = None
-        self.h_perf_m = 812  # ТР
-        self.h_pump_m = 811  # ТР
-        self.udl_m = 77  # ТР
+        self.h_perf_m = 828  # ТР
+        self.h_pump_m = 827  # ТР
+        self.udl_m = 94  # ТР
 
         self.ksep_d = 0.7  # ТР
         self.KsepGS_fr = 0.7  # ТР
@@ -152,12 +152,12 @@ def mass_calculation(well_state, debug_print = False, restore_flow = False, rest
         this_state.error_in_step = result_for_folve
         return result_for_folve
     if restore_flow == False:
-        result = minimize(calc_well_plin_pwf_atma_for_fsolve, [0.5, 0.5], bounds=[[0, 20], [0, 20]])
+        result = minimize(calc_well_plin_pwf_atma_for_fsolve, [0.5, 0.5], bounds=[[0, 5], [0, 5]])
     else:
         if restore_q_liq_only == True:
-            result = minimize(calc_well_plin_pwf_atma_for_fsolve, [100], bounds=[[1, 200]])
+            result = minimize(calc_well_plin_pwf_atma_for_fsolve, [100], bounds=[[5, 700]])
         else:
-            result = minimize(calc_well_plin_pwf_atma_for_fsolve, [100, 20], bounds=[[1, 175], [10, 35]])
+            result = minimize(calc_well_plin_pwf_atma_for_fsolve, [100, 20], bounds=[[5, 175], [10, 35]])
 
     print(result)
     true_result = this_state.result
@@ -168,9 +168,9 @@ debug_mode = True
 vfm_calc_option = True
 restore_q_liq_only = True
 if calc_option == True:
-    start = datetime.datetime(2018,12,7)
-    end = datetime.datetime(2021,2,27)
-    prepared_data = pd.read_csv("stuff_to_merge/252_restore__input_data.csv")
+    start = datetime.datetime(2017,12,1,5)
+    end = datetime.datetime(2022,2,27)
+    prepared_data = pd.read_csv("stuff_to_merge/569_restore__input_data.csv")
     prepared_data.index = pd.to_datetime(prepared_data["Unnamed: 0"])
     prepared_data = prepared_data[(prepared_data.index >= start) & (prepared_data.index <= end)]
     del prepared_data["Unnamed: 0"]
