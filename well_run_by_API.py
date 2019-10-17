@@ -3,7 +3,6 @@
 
 Кобзарь О.С Хабибуллин Р.А. 21.08.2019
 """
-calc_mark_str = "569_big_run_5"
 # TODO отрефакторить
 # TODO перепад давления в насосе
 # TODO сразу ошибка для определения дебита на фактических точках
@@ -12,7 +11,7 @@ calc_mark_str = "569_big_run_5"
 # TODO поверхность решения
 # TODO начальное приближение
 # TODO точность
-# TODO изменение функции ошибки (деление на максимум, добавление линейного давления, добавления штуцера с другой стороны)
+# TODO изменение функции ошибки (деление на максимум, добавление линейного давления, добавления штуцера)
 import description_generated.python_api as python_api
 from scipy.optimize import minimize
 import pandas as pd
@@ -23,9 +22,40 @@ sys.path.append("../")
 import datetime
 import time
 
+calc_mark_str = "1628_big_run_1"
+input_data_filename_str = '1628_input_data'
+calc_option = True
+debug_mode = True
+vfm_calc_option = False
+restore_q_liq_only = False
+start_time_of_interval = datetime.datetime(2019, 2, 1)
+end_time_of_interval = datetime.datetime(2022, 2, 27)
+amount_iters_before_restart = 25
+sleep_time_sec = 25
+p_buf_value_in_error_coeff = 0.5
+
 class all_ESP_data():
     def __init__(self):
-        self.esp_id = UniflocVBA.calc_ESP_id_by_rate(500)
+        self.ESP_rate_nom = 400
+        self.esp_id = UniflocVBA.calc_ESP_id_by_rate(self.ESP_rate_nom)
+        self.ESP_head_nom = 1200
+        self.dcas_mm = 160
+        self.h_tube_m = 827
+        self.d_tube_mm = 76
+        self.p_cas_data_atm = -1  # нет расчета затрубного пространства - он долгий и немножко бесполезный
+
+        self.eff_motor_d = 0.89
+        self.i_motor_nom_a = 63.5
+        self.power_motor_nom_kwt = 140
+        self.h_perf_m = 732  # ТР
+        self.h_pump_m = 731  # ТР
+        self.udl_m = 31  # ТР
+
+        self.c_calibr_rate_d = 1
+
+        self.ksep_d = 0.7  # ТР
+        self.KsepGS_fr = 0.7  # ТР
+        self.hydr_corr = 1  # 0 - BB, 1 - Ansari
         self.gamma_oil = 0.945
         self.gamma_gas = 0.9
         self.gamma_wat = 1.011
@@ -34,58 +64,37 @@ class all_ESP_data():
         self.pb_atm = 40
         self.bob_m3m3 = 1.045
         self.muob_cp = 100
-
-        self.psep_atm = 30
-        self.tsep_c = 30
-
-        self.d_choke_mm = 32
-        self.dcas_mm = 160
-        self.h_tube_m = 827
-        self.d_tube_mm = 76
-
-        self.Power_motor_nom_kWt = 80
-        self.ESP_head_nom = 1000
-        self.ESP_rate_nom = None
-        self.ESP_freq = None
-
         self.rp_m3m3 = 30
 
+        self.psep_atm = None
+        self.tsep_c = None
+
+        self.d_choke_mm = None
+        self.ESP_freq = None
         self.p_intake_data_atm = None
         self.p_wellhead_data_atm = None
         self.p_buf_data_atm = None
         self.p_wf_atm = None
-        self.p_cas_data_atm = -1  # нет расчета затрубного пространства
-
-        self.eff_motor_d = 0.89
-        self.i_motor_nom_a = 59.5
-        self.power_motor_nom_kwt = 180
-        self.i_motor_data_a = None
+        #self.i_motor_data_a = None
         self.cos_phi_data_d = None
-        self.load_motor_data_d = None
+        #self.load_motor_data_d = None
         self.u_motor_data_v = None
         self.active_power_cs_data_kwt = None
-
         self.qliq_m3day = None
         self.watercut_perc = None
         self.p_buf_data_atm = None
-        self.h_perf_m = 828  # ТР
-        self.h_pump_m = 827  # ТР
-        self.udl_m = 94  # ТР
-
-        self.ksep_d = 0.7  # ТР
-        self.KsepGS_fr = 0.7  # ТР
         self.c_calibr_head_d = None
-        self.c_calibr_rate_d = 1
         self.c_calibr_power_d = None
-        self.hydr_corr = 1 # 0 - BB, 1 - Ansari
+
         self.result = None
         self.error_in_step = None
+        self.p_buf_data_max_atm = None
+        self.active_power_cs_data_max_kwt = None
 
 
-def mass_calculation(well_state, debug_print = False, restore_flow = False, restore_q_liq_only = True):
-    this_state = well_state
+def mass_calculation(this_state, debug_print = False, restore_flow=False, restore_q_liq_only = True):
     def calc_well_plin_pwf_atma_for_fsolve(minimaze_parameters):
-        if restore_flow == False: #TODO изменить коэффициенты для восстановления дебита
+        if restore_flow == False: # TODO изменить коэффициенты для восстановления дебита
             this_state.c_calibr_power_d = minimaze_parameters[1]
             this_state.c_calibr_head_d = minimaze_parameters[0]
             this_state.c_calibr_rate_d = this_state.c_calibr_rate_d
@@ -136,15 +145,13 @@ def mass_calculation(well_state, debug_print = False, restore_flow = False, rest
                                                     this_state.ksep_d, this_state.c_calibr_head_d, this_state.c_calibr_power_d,
                                                     this_state.c_calibr_rate_d)
 
-
-
         this_state.result = result
-
         p_buf_calc_atm = result[0][2]
         power_CS_calc_W = result[0][16]
-        power_regulatization = 1 / 1000
-        result_for_folve = (p_buf_calc_atm - this_state.p_buf_data_atm) ** 2 + \
-                           (power_regulatization * (power_CS_calc_W - this_state.active_power_cs_data_kwt)) ** 2
+        result_for_folve = p_buf_value_in_error_coeff * \
+                           ((p_buf_calc_atm - this_state.p_buf_data_atm) / this_state.p_buf_data_max_atm) ** 2 + \
+                           (1 - p_buf_value_in_error_coeff) * ((power_CS_calc_W - this_state.active_power_cs_data_kwt) /
+                            this_state.active_power_cs_data_max_kwt) ** 2
         if debug_print:
             print("power_CS_calc_W = " + str(power_CS_calc_W))
             print("active_power_cs_data_kwt = " + str(this_state.active_power_cs_data_kwt))
@@ -155,24 +162,18 @@ def mass_calculation(well_state, debug_print = False, restore_flow = False, rest
         result = minimize(calc_well_plin_pwf_atma_for_fsolve, [0.5, 0.5], bounds=[[0, 5], [0, 5]])
     else:
         if restore_q_liq_only == True:
-            result = minimize(calc_well_plin_pwf_atma_for_fsolve, [100], bounds=[[5, 700]])
+            result = minimize(calc_well_plin_pwf_atma_for_fsolve, [100], bounds=[[3, 700]])
         else:
             result = minimize(calc_well_plin_pwf_atma_for_fsolve, [100, 20], bounds=[[5, 175], [10, 35]])
-
     print(result)
     true_result = this_state.result
     return true_result
 
-calc_option = True
-debug_mode = True
-vfm_calc_option = True
-restore_q_liq_only = True
+
 if calc_option == True:
-    start = datetime.datetime(2017,12,1,5)
-    end = datetime.datetime(2022,2,27)
-    prepared_data = pd.read_csv("stuff_to_merge/569_restore__input_data.csv")
+    prepared_data = pd.read_csv("stuff_to_merge/" + input_data_filename_str + ".csv")
     prepared_data.index = pd.to_datetime(prepared_data["Unnamed: 0"])
-    prepared_data = prepared_data[(prepared_data.index >= start) & (prepared_data.index <= end)]
+    prepared_data = prepared_data[(prepared_data.index >= start_time_of_interval) & (prepared_data.index <= end_time_of_interval)]
     del prepared_data["Unnamed: 0"]
 
     result_list = []
@@ -181,41 +182,38 @@ if calc_option == True:
     start_time = time.time()
     for i in range(prepared_data.shape[0]):
     #for i in range(3):
-        check = i % 25
+        check = i % amount_iters_before_restart
         if check == 0 and i != 0:
             print('Перезапуск Excel и VBA')
             UniflocVBA.book.close()
-            time.sleep(25)
+            time.sleep(sleep_time_sec)
             UniflocVBA.book = xw.Book("UniflocVBA_7.xlam")
         start_in_loop_time = time.time()
         row_in_prepared_data = prepared_data.iloc[i]
         print("Расчет для времени:")
         print(prepared_data.index[i])
         print('Итерация № ' + str(i) + ' из ' + str(prepared_data.shape[0]))
+
         this_state = all_ESP_data()
         this_state.qliq_m3day = row_in_prepared_data['Объемный дебит жидкости (СУ)']
         this_state.watercut_perc = row_in_prepared_data['Процент обводненности (СУ)']
         this_state.rp_m3m3 = row_in_prepared_data['ГФ (СУ)']
-
         this_state.p_buf_data_atm = row_in_prepared_data['Рбуф (Ш)']
         this_state.p_wellhead_data_atm = row_in_prepared_data['Рлин ТМ (Ш)']
-
         this_state.tsep_c = row_in_prepared_data['Температура на приеме насоса (пласт. жидкость) (СУ)']
-        this_state.tres_c = 16
         this_state.p_intake_data_atm = row_in_prepared_data['Давление на приеме насоса (пласт. жидкость) (СУ)'] * 10
         this_state.psep_atm = row_in_prepared_data['Давление на приеме насоса (пласт. жидкость) (СУ)'] * 10
         this_state.p_wf_atm = row_in_prepared_data['Давление на приеме насоса (пласт. жидкость) (СУ)'] * 10
-
         this_state.d_choke_mm = row_in_prepared_data['Dшт (Ш)']
-
         this_state.ESP_freq = row_in_prepared_data['Выходная частота ПЧ (СУ)']
         this_state.active_power_cs_data_kwt = row_in_prepared_data['Активная мощность (СУ)'] * 1000
         this_state.u_motor_data_v = row_in_prepared_data['Напряжение на выходе ТМПН (СУ)']
         this_state.cos_phi_data_d = row_in_prepared_data['Коэффициент мощности (СУ)']
-        this_state.c_calibr_rate_d = 1
         if vfm_calc_option == True:
             this_state.c_calibr_head_d = row_in_prepared_data["Коэффициент калибровки по напору - множитель (Модель, вход)"]
             this_state.c_calibr_power_d = row_in_prepared_data["Коэффициент калибровки по мощности - множитель (Модель, вход)"]
+        this_state.active_power_cs_data_max_kwt = prepared_data['Активная мощность (СУ)'].max() * 1000
+        this_state.p_buf_data_max_atm = prepared_data['Рбуф (Ш)'].max()
         this_result = mass_calculation(this_state, debug_mode, vfm_calc_option, restore_q_liq_only)
         result_list.append(this_result)
         end_in_loop_time = time.time()
