@@ -22,14 +22,14 @@ sys.path.append("../")
 import datetime
 import time
 
-calc_mark_str = "1628_big_run_1"
-input_data_filename_str = '1628_input_data'
+calc_mark_str = "1628_big_run_3"
+input_data_filename_str = '1628_restore__input_data'
 calc_option = True
 debug_mode = True
-vfm_calc_option = False
-restore_q_liq_only = False
+vfm_calc_option = True
+restore_q_liq_only = True
 start_time_of_interval = datetime.datetime(2019, 2, 1)
-end_time_of_interval = datetime.datetime(2022, 2, 27)
+end_time_of_interval = datetime.datetime(2019, 2, 10)
 amount_iters_before_restart = 25
 sleep_time_sec = 25
 p_buf_value_in_error_coeff = 0.5
@@ -75,9 +75,7 @@ class all_ESP_data():
         self.p_wellhead_data_atm = None
         self.p_buf_data_atm = None
         self.p_wf_atm = None
-        #self.i_motor_data_a = None
         self.cos_phi_data_d = None
-        #self.load_motor_data_d = None
         self.u_motor_data_v = None
         self.active_power_cs_data_kwt = None
         self.qliq_m3day = None
@@ -210,8 +208,11 @@ if calc_option == True:
         this_state.u_motor_data_v = row_in_prepared_data['Напряжение на выходе ТМПН (СУ)']
         this_state.cos_phi_data_d = row_in_prepared_data['Коэффициент мощности (СУ)']
         if vfm_calc_option == True:
-            this_state.c_calibr_head_d = row_in_prepared_data["Коэффициент калибровки по напору - множитель (Модель, вход)"]
-            this_state.c_calibr_power_d = row_in_prepared_data["Коэффициент калибровки по мощности - множитель (Модель, вход)"]
+            #this_state.c_calibr_head_d = row_in_prepared_data["Коэффициент калибровки по напору - множитель (Модель, вход)"]
+            #this_state.c_calibr_power_d = row_in_prepared_data["Коэффициент калибровки по мощности - множитель (Модель, вход)"]
+            this_state.c_calibr_head_d = prepared_data["Коэффициент калибровки по напору - множитель (Модель, вход)"].mean()
+            this_state.c_calibr_power_d = prepared_data["Коэффициент калибровки по мощности - множитель (Модель, вход)"].mean()
+
         this_state.active_power_cs_data_max_kwt = prepared_data['Активная мощность (СУ)'].max() * 1000
         this_state.p_buf_data_max_atm = prepared_data['Рбуф (Ш)'].max()
         this_result = mass_calculation(this_state, debug_mode, vfm_calc_option, restore_q_liq_only)
@@ -228,11 +229,16 @@ if calc_option == True:
         new_dataframe = pd.DataFrame(new_dict)
         new_dataframe.index = new_dataframe['Time']
         result_dataframe = result_dataframe.append(new_dataframe, sort=False)
-        result_dataframe.to_csv("stuff_to_merge/" + calc_mark_str + "_current.csv")
+        if vfm_calc_option == True:
+            result_dataframe.to_csv("stuff_to_merge/" + calc_mark_str + "_restore_current.csv")
+        else:
+            result_dataframe.to_csv("stuff_to_merge/" + calc_mark_str + "_current.csv")
 
     end_time = time.time()
     print("Затрачено всего: " + str(end_time - start_time))
-
-    result_dataframe.to_csv("stuff_to_merge/" + calc_mark_str + "_finished.csv")
+    if vfm_calc_option == True:
+        result_dataframe.to_csv("stuff_to_merge/" + calc_mark_str + "_restore_finished.csv")
+    else:
+        result_dataframe.to_csv("stuff_to_merge/" + calc_mark_str + "_finished.csv")
 close_f = UniflocVBA.book.macro('close_book_by_macro')
 close_f()
