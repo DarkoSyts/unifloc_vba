@@ -11,6 +11,7 @@
 # TODO поверхность решения
 # TODO начальное приближение
 # TODO точность
+# TODO use COBYLA
 # TODO изменение функции ошибки (деление на максимум, добавление линейного давления, добавления штуцера)
 import description_generated.python_api as python_api
 from scipy.optimize import minimize
@@ -22,34 +23,34 @@ sys.path.append("../")
 import datetime
 import time
 
-calc_mark_str = "1628_big_run_3"
-input_data_filename_str = '1628_restore__input_data'
+calc_mark_str = "601_big_run_1"
+input_data_filename_str = '601_input_data'
 calc_option = True
 debug_mode = True
-vfm_calc_option = True
-restore_q_liq_only = True
-start_time_of_interval = datetime.datetime(2019, 2, 1)
-end_time_of_interval = datetime.datetime(2019, 2, 10)
+vfm_calc_option = False
+restore_q_liq_only = False
+start_time_of_interval = datetime.datetime(2017, 2, 1)
+end_time_of_interval = datetime.datetime(2020, 2, 10)
 amount_iters_before_restart = 25
 sleep_time_sec = 25
 p_buf_value_in_error_coeff = 0.5
 
 class all_ESP_data():
     def __init__(self):
-        self.ESP_rate_nom = 400
+        self.ESP_rate_nom = 500
         self.esp_id = UniflocVBA.calc_ESP_id_by_rate(self.ESP_rate_nom)
-        self.ESP_head_nom = 1200
+        self.ESP_head_nom = 1600
         self.dcas_mm = 160
         self.h_tube_m = 827
         self.d_tube_mm = 76
         self.p_cas_data_atm = -1  # нет расчета затрубного пространства - он долгий и немножко бесполезный
 
         self.eff_motor_d = 0.89
-        self.i_motor_nom_a = 63.5
-        self.power_motor_nom_kwt = 140
-        self.h_perf_m = 732  # ТР
-        self.h_pump_m = 731  # ТР
-        self.udl_m = 31  # ТР
+        self.i_motor_nom_a = 72.7
+        self.power_motor_nom_kwt = 250
+        self.h_perf_m = 818  # ТР
+        self.h_pump_m = 817  # ТР
+        self.udl_m = 87  # ТР
 
         self.c_calibr_rate_d = 1
 
@@ -81,8 +82,8 @@ class all_ESP_data():
         self.qliq_m3day = None
         self.watercut_perc = None
         self.p_buf_data_atm = None
-        self.c_calibr_head_d = None
-        self.c_calibr_power_d = None
+        self.c_calibr_head_d = 0.5  # initial guess
+        self.c_calibr_power_d = 0.5  # initial guess
 
         self.result = None
         self.error_in_step = None
@@ -157,7 +158,8 @@ def mass_calculation(this_state, debug_print = False, restore_flow=False, restor
         this_state.error_in_step = result_for_folve
         return result_for_folve
     if restore_flow == False:
-        result = minimize(calc_well_plin_pwf_atma_for_fsolve, [0.5, 0.5], bounds=[[0, 5], [0, 5]])
+        result = minimize(calc_well_plin_pwf_atma_for_fsolve, [this_state.c_calibr_head_d, this_state.c_calibr_power_d],
+                          bounds=[[0, 5], [0, 5]])
     else:
         if restore_q_liq_only == True:
             result = minimize(calc_well_plin_pwf_atma_for_fsolve, [100], bounds=[[3, 700]])
@@ -178,6 +180,7 @@ if calc_option == True:
     result_dataframe = {'d':[2]}
     result_dataframe = pd.DataFrame(result_dataframe)
     start_time = time.time()
+    this_state = all_ESP_data()
     for i in range(prepared_data.shape[0]):
     #for i in range(3):
         check = i % amount_iters_before_restart
@@ -192,7 +195,6 @@ if calc_option == True:
         print(prepared_data.index[i])
         print('Итерация № ' + str(i) + ' из ' + str(prepared_data.shape[0]))
 
-        this_state = all_ESP_data()
         this_state.qliq_m3day = row_in_prepared_data['Объемный дебит жидкости (СУ)']
         this_state.watercut_perc = row_in_prepared_data['Процент обводненности (СУ)']
         this_state.rp_m3m3 = row_in_prepared_data['ГФ (СУ)']
@@ -208,10 +210,10 @@ if calc_option == True:
         this_state.u_motor_data_v = row_in_prepared_data['Напряжение на выходе ТМПН (СУ)']
         this_state.cos_phi_data_d = row_in_prepared_data['Коэффициент мощности (СУ)']
         if vfm_calc_option == True:
-            #this_state.c_calibr_head_d = row_in_prepared_data["Коэффициент калибровки по напору - множитель (Модель, вход)"]
-            #this_state.c_calibr_power_d = row_in_prepared_data["Коэффициент калибровки по мощности - множитель (Модель, вход)"]
-            this_state.c_calibr_head_d = prepared_data["Коэффициент калибровки по напору - множитель (Модель, вход)"].mean()
-            this_state.c_calibr_power_d = prepared_data["Коэффициент калибровки по мощности - множитель (Модель, вход)"].mean()
+            this_state.c_calibr_head_d = row_in_prepared_data["Коэффициент калибровки по напору - множитель (Модель, вход)"]
+            this_state.c_calibr_power_d = row_in_prepared_data["Коэффициент калибровки по мощности - множитель (Модель, вход)"]
+            #this_state.c_calibr_head_d = prepared_data["Коэффициент калибровки по напору - множитель (Модель, вход)"].mean()
+            #this_state.c_calibr_power_d = prepared_data["Коэффициент калибровки по мощности - множитель (Модель, вход)"].mean()
 
         this_state.active_power_cs_data_max_kwt = prepared_data['Активная мощность (СУ)'].max() * 1000
         this_state.p_buf_data_max_atm = prepared_data['Рбуф (Ш)'].max()
@@ -232,13 +234,13 @@ if calc_option == True:
         if vfm_calc_option == True:
             result_dataframe.to_csv("stuff_to_merge/" + calc_mark_str + "_restore_current.csv")
         else:
-            result_dataframe.to_csv("stuff_to_merge/" + calc_mark_str + "_current.csv")
+            result_dataframe.to_csv("stuff_to_merge/" + calc_mark_str + "_adaptation_current.csv")
 
     end_time = time.time()
     print("Затрачено всего: " + str(end_time - start_time))
     if vfm_calc_option == True:
         result_dataframe.to_csv("stuff_to_merge/" + calc_mark_str + "_restore_finished.csv")
     else:
-        result_dataframe.to_csv("stuff_to_merge/" + calc_mark_str + "_finished.csv")
+        result_dataframe.to_csv("stuff_to_merge/" + calc_mark_str + "_adaptation_finished.csv")
 close_f = UniflocVBA.book.macro('close_book_by_macro')
 close_f()
