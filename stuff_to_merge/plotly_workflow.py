@@ -108,7 +108,8 @@ def create_traces_list_for_all_columms(data_frame, chosen_mode='lines', low_memo
     columns_name_list = data_frame.columns
     for i in columns_name_list:
         column_name = i
-        this_trace = create_plotly_trace(data_frame.index, data_frame[column_name], column_name, chosen_mode, low_memory)
+        this_series = data_frame[column_name].dropna()
+        this_trace = create_plotly_trace(this_series.index, this_series, column_name, chosen_mode, low_memory)
         trace_list.append(this_trace)
     return trace_list
 

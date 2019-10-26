@@ -18,7 +18,7 @@ const_tres_default = 90
 const_Roughness_default = 0.0001 
 Standing_based = 0 
 import xlwings as xw
-addin_name_str = "UniflocVBA_7.xlam"
+#addin_name_str = "UniflocVBA_7.xlam"
 class API():
     def __init__(self, addin_name_str):
         self.book = xw.Book(addin_name_str)
@@ -2260,4 +2260,4 @@ class API():
         self.crv_intersection = self.book.macro("crv_intersection")
         return self.crv_intersection(x1_points,y1_points,x2_points,y2_points)
 
-UniflocVBA = API(addin_name_str)
+#UniflocVBA = API(addin_name_str)
