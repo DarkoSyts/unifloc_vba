@@ -286,6 +286,51 @@ class API():
         self.f_MF_fit_pipe_m3day = self.book.macro("MF_fit_pipe_m3day")
         return self.f_MF_fit_pipe_m3day(qliq_sm3day,fw_perc,length_m,pcalc_atma,calc_along_flow,str_PVT,theta_deg,d_mm,hydr_corr,t_in_C,t_out_C,c_calibr_grav,c_calibr_fric,roughness_m,calibr_type)
 
+    def MF_p_pipeline_atma(self, qliq_sm3day, fw_perc, h_list_m, pcalc_atma, tcalc_C, calc_along_coord,
+                           flow_along_coord, str_PVT, diam_list_mm, hydr_corr, temp_C,
+                           temp_methodTEMP_CALC_METHOD, c_calibr_grav=1, c_calibr_fric=1,
+                           roughness_m=0.0001, q_gas_sm3day=0):
+        """" расчет распределения давления и температуры в трубопроводе  с использованием многофазных корреляций
+
+                       qliq_sm3day - дебит жидкости в поверхностных условиях
+
+        fw_perc - обводненность
+
+        h_list_m - траектория трубы. range или таблица [0..n,0..1]
+
+        pcalc_atma - давление с которого начинается расчет, атм  граничное значение для проведения расчета  необязательные параметры  стандартные набор pvt параметров
+
+   tcalc_c
+
+        calc_along_coord - флаг направления расчета относительно потока  если = 1 то расчет по потоку  если = 0 то расчет против потока  pcalc_atma - давление с которого начинается..см.мануал
+
+   flow_along_coord
+
+        str_pvt - закодированная строка с параметрами pvt.  если задана - перекрывает другие значения  d_mm - внутрнний диаметр трубы
+
+   diam_list_mm
+
+        hydr_corr - гидравлическая корреляция, h_correlation  beggsbrill = 0  ansari = 1  unified = 2  gray = 3  hagedornbrown = 4  sakharovmokhov = 5  t_calc_c - температура в..см.мануал
+
+   temp_c
+
+   temp_methodtemp_calc_method
+
+        c_calibr_grav - поправка на гравитационную составляющую  перепада давления
+
+        c_calibr_fric - поправка на трение в перепаде давления
+
+        roughness_m - шероховатость трубы
+
+        q_gas_sm3day - свободный газ поступающие в трубу.    )
+
+        """
+
+        self.f_MF_p_pipeline_atma = self.book.macro("MF_p_pipeline_atma")
+        return self.f_MF_p_pipeline_atma(qliq_sm3day, fw_perc, h_list_m, pcalc_atma, tcalc_C, calc_along_coord,
+                                         flow_along_coord, str_PVT, diam_list_mm, hydr_corr, temp_C,
+                                         temp_methodTEMP_CALC_METHOD, c_calibr_grav, c_calibr_fric, roughness_m,
+                                         q_gas_sm3day)
 
     def MF_p_pipe_atma(self, qliq_sm3day,fw_perc,length_m,pcalc_atma,calc_along_flow,str_PVT=PVT_DEFAULT,theta_deg=90,d_mm=60,hydr_corr=H_CORRELATION,t_calc_C=50,tother_C=-1,c_calibr_grav=1,c_calibr_fric=1,roughness_m=0.0001,q_gas_sm3day=0):
         """ расчет распределения давления и температуры в трубе  с использованием многофазных корреляций
