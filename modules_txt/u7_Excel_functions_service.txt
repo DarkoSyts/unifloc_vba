@@ -562,9 +562,9 @@ On Error GoTo err1:
         If (TypeOf rr Is range) Then
             If rr.Cells.Count = 1 Then
                 ReDim ar(1 To 1, 1 To 1)
-                ar(1, 1) = rr.Value
+                ar(1, 1) = rr.value
             Else
-                ar = rr.Value
+                ar = rr.value
             End If
             For i = LBound(ar) To UBound(ar)
                 If Not IsEmpty(ar(i, 1)) Then
